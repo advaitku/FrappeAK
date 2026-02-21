@@ -1,0 +1,75 @@
+<!--
+  AK Document Designer — Quotation Template
+  Reference DocType: Quotation
+  Mode: Document (share existing quotation)
+
+  Template Settings:
+    - Show Accept/Decline: Yes
+    - Lock After Submission: Yes
+    - Expires In Days: 7
+
+  Interactive Fields (child table):
+    | Field Name      | Label            | Type   | Existing | Editable | Mandatory | Column |
+    | customer_name   | Customer         | Data   | Yes      | No       | No        | Left   |
+    | contact_email   | Contact Email    | Data   | Yes      | Yes      | Yes       | Right  |
+    | delivery_date   | Expected Delivery| Date   | No       | Yes      | Yes       | Left   |
+    | shipping_method | Shipping Method  | Select | No       | Yes      | Yes       | Right  |
+
+  Options for shipping_method:
+    Standard Shipping
+    Express Shipping
+    Overnight
+    Local Pickup
+-->
+<div class="ak-document">
+  <div class="ak-header">
+    <table class="ak-two-col">
+      <tr>
+        <td>
+          <h1 style="font-size: 28px; color: #1f2937; margin-bottom: 4px;">QUOTATION</h1>
+          <p style="font-size: 16px; color: #6b7280;">{{ doc.name }}</p>
+        </td>
+        <td style="text-align: right;">
+          <p><strong>{{ doc.company }}</strong></p>
+          <p style="font-size: 13px; color: #6b7280;">Date: {{ doc.transaction_date }}</p>
+          <p style="font-size: 13px; color: #6b7280;">Valid Until: {{ doc.valid_till or "Not specified" }}</p>
+        </td>
+      </tr>
+    </table>
+  </div>
+
+  <div class="ak-section">
+    <h3>Prepared For</h3>
+    <p><strong>{{ doc.customer_name }}</strong></p>
+    {% if doc.contact_display %}
+    <p style="font-size: 13px;">{{ doc.contact_display }}</p>
+    {% endif %}
+    {% if doc.address_display %}
+    <p style="font-size: 13px; color: #4b5563;">{{ doc.address_display }}</p>
+    {% endif %}
+  </div>
+
+  {{ ak_items_table(doc, columns=["item_name", "qty", "rate", "amount"]) }}
+
+  <div class="ak-section" style="text-align: right; font-size: 16px;">
+    {% if doc.additional_discount_percentage %}
+    <p>Subtotal: {{ format_currency(doc.total) }}</p>
+    <p>Discount ({{ doc.additional_discount_percentage }}%): -{{ format_currency(doc.discount_amount) }}</p>
+    {% endif %}
+    <p><strong style="font-size: 20px;">Total: {{ format_currency(doc.grand_total) }}</strong></p>
+  </div>
+
+  {% if doc.terms %}
+  <div class="ak-section">
+    <h3>Terms & Conditions</h3>
+    <div style="font-size: 13px; color: #4b5563;">{{ doc.terms }}</div>
+  </div>
+  {% endif %}
+
+  <div class="ak-section">
+    <h3>Please Confirm Your Details</h3>
+    {{ ak_field_table(columns=2) }}
+  </div>
+
+  {{ ak_accept_decline(accept_label="Accept Quotation", decline_label="Decline") }}
+</div>

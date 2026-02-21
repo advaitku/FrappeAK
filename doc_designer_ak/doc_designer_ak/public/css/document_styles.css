@@ -1,0 +1,431 @@
+/* ============================================
+   AK Document Designer — Default Styles
+   ============================================ */
+
+/* --- Shared Page Layout --- */
+.ak-shared-page {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.ak-shared-branding {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 0;
+    margin-bottom: 20px;
+}
+
+.ak-shared-logo {
+    height: 40px;
+    width: auto;
+}
+
+.ak-shared-company {
+    font-size: 18px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.ak-shared-footer {
+    text-align: center;
+    padding: 20px 0;
+    color: #9ca3af;
+    font-size: 13px;
+    border-top: 1px solid #e5e7eb;
+    margin-top: 40px;
+}
+
+/* --- Error Page --- */
+.ak-shared-error {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 60vh;
+    padding: 20px;
+}
+
+.ak-error-card {
+    text-align: center;
+    background: #fff;
+    border-radius: 12px;
+    padding: 48px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    max-width: 480px;
+}
+
+.ak-error-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+}
+
+.ak-error-card h2 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 8px;
+}
+
+.ak-error-card p {
+    color: #6b7280;
+    font-size: 14px;
+}
+
+/* --- Document Container --- */
+.ak-document {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+    margin-bottom: 24px;
+}
+
+.ak-document-form {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    padding: 40px;
+}
+
+.ak-document-body {
+    /* Body wrapper */
+}
+
+/* --- Layout --- */
+.ak-header {
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.ak-footer {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #e5e7eb;
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.ak-section {
+    margin-bottom: 24px;
+}
+
+.ak-cover-page {
+    text-align: center;
+    padding: 60px 40px;
+    margin-bottom: 32px;
+}
+
+.ak-page-break {
+    page-break-after: always;
+    height: 0;
+    margin: 0;
+}
+
+.ak-notice {
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+    border-radius: 6px;
+    padding: 12px 16px;
+    margin: 16px 0;
+    font-size: 14px;
+    color: #92400e;
+}
+
+/* --- Two Column Layout --- */
+.ak-two-col {
+    width: 100%;
+}
+
+.ak-two-col td {
+    width: 50%;
+    vertical-align: top;
+    padding: 0 8px;
+}
+
+.ak-col-left {
+    padding-right: 12px;
+}
+
+.ak-col-right {
+    padding-left: 12px;
+}
+
+/* --- Interactive Fields --- */
+.ak-field {
+    margin-bottom: 16px;
+}
+
+.ak-field-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    margin-bottom: 4px;
+}
+
+.ak-field-mandatory .ak-field-label::after {
+    content: " *";
+    color: #ef4444;
+}
+
+.ak-field-input {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #1f2937;
+    background: #fff;
+    transition: border-color 0.15s ease;
+}
+
+.ak-field-input:focus {
+    outline: none;
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+}
+
+.ak-field-input:disabled {
+    background: #f9fafb;
+    color: #6b7280;
+    cursor: not-allowed;
+}
+
+.ak-field-readonly .ak-field-input {
+    background: #f9fafb;
+    color: #6b7280;
+}
+
+.ak-field-error .ak-field-input {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+/* Checkbox */
+.ak-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-weight: 400;
+}
+
+.ak-checkbox-label input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+}
+
+/* --- Form Table --- */
+.ak-field-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+}
+
+.ak-field-table td {
+    padding: 4px 8px;
+    vertical-align: top;
+}
+
+/* --- Items / Pricing Table --- */
+.ak-items-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    font-size: 14px;
+}
+
+.ak-items-table thead {
+    background: #f3f4f6;
+}
+
+.ak-items-table th {
+    padding: 10px 12px;
+    text-align: left;
+    font-weight: 600;
+    color: #374151;
+    border-bottom: 2px solid #e5e7eb;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.ak-items-table td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #f3f4f6;
+    color: #4b5563;
+}
+
+.ak-items-table tbody tr:hover {
+    background: #f9fafb;
+}
+
+.ak-items-col-num {
+    width: 40px;
+    text-align: center;
+    color: #9ca3af;
+}
+
+.ak-items-col-qty,
+.ak-items-col-rate,
+.ak-items-col-amount,
+.ak-items-col-net_amount {
+    text-align: right;
+}
+
+.ak-items-total td {
+    padding-top: 12px;
+    border-top: 2px solid #e5e7eb;
+    text-align: right;
+    font-size: 15px;
+}
+
+/* --- Action Buttons --- */
+.ak-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid #e5e7eb;
+    justify-content: center;
+}
+
+.ak-accept-btn,
+.ak-submit-btn {
+    padding: 12px 32px;
+    background: #4f46e5;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.ak-accept-btn:hover,
+.ak-submit-btn:hover {
+    background: #4338ca;
+}
+
+.ak-decline-btn {
+    padding: 12px 32px;
+    background: #fff;
+    color: #dc2626;
+    border: 2px solid #dc2626;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.ak-decline-btn:hover {
+    background: #fef2f2;
+}
+
+/* --- Success Message --- */
+.ak-success-message {
+    text-align: center;
+    padding: 60px 40px;
+}
+
+.ak-success-icon {
+    width: 64px;
+    height: 64px;
+    background: #10b981;
+    color: #fff;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin-bottom: 16px;
+}
+
+.ak-success-message h2 {
+    font-size: 20px;
+    color: #1f2937;
+    font-weight: 600;
+}
+
+/* --- Locked Notice --- */
+.ak-locked-notice {
+    background: #fef3c7;
+    border: 1px solid #f59e0b;
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    margin-top: 24px;
+    color: #92400e;
+}
+
+/* --- Toast Messages --- */
+.ak-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 10000;
+    animation: ak-toast-in 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.ak-toast-error {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fca5a5;
+}
+
+.ak-toast-success {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #86efac;
+}
+
+@keyframes ak-toast-in {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Responsive --- */
+@media (max-width: 640px) {
+    .ak-document,
+    .ak-document-form {
+        padding: 20px;
+        border-radius: 0;
+    }
+
+    .ak-shared-page {
+        padding: 0;
+    }
+
+    .ak-two-col td {
+        display: block;
+        width: 100%;
+        padding: 0;
+    }
+
+    .ak-actions {
+        flex-direction: column;
+    }
+}
+
+/* --- Print / PDF --- */
+@media print {
+    body { background: #fff; }
+    .ak-shared-branding,
+    .ak-shared-footer,
+    .ak-actions,
+    .ak-toast { display: none; }
+    .ak-document,
+    .ak-document-form {
+        box-shadow: none;
+        padding: 0;
+    }
+}

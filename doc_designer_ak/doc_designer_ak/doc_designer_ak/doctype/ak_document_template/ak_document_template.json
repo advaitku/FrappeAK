@@ -1,0 +1,349 @@
+{
+ "actions": [],
+ "autoname": "field:template_name",
+ "creation": "2026-02-20 00:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "template_name",
+  "reference_doctype",
+  "is_active",
+  "is_public_form",
+  "preview_section",
+  "preview_document",
+  "preview_html",
+  "template_content_section",
+  "template_html",
+  "custom_css",
+  "header_footer_section",
+  "header_html",
+  "footer_html",
+  "cover_page_html",
+  "interactive_fields_section",
+  "fields",
+  "page_settings_section",
+  "page_format",
+  "column_break_page",
+  "top_margin",
+  "bottom_margin",
+  "left_margin",
+  "right_margin",
+  "online_document_settings_section",
+  "expires_in_days",
+  "track_opens",
+  "column_break_online",
+  "show_accept_decline",
+  "lock_after_submission",
+  "disable_access_after_submission",
+  "success_message",
+  "email_settings_section",
+  "email_subject",
+  "email_body_html",
+  "attach_pdf",
+  "notifications_section",
+  "notify_on_view",
+  "notify_on_response",
+  "column_break_notify",
+  "reminder_days",
+  "automation_section",
+  "auto_send_on",
+  "auto_send_to_field",
+  "auto_send_doctype_filter"
+ ],
+ "fields": [
+  {
+   "fieldname": "template_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Template Name",
+   "reqd": 1,
+   "unique": 1
+  },
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Reference DocType",
+   "options": "DocType",
+   "reqd": 1
+  },
+  {
+   "default": "1",
+   "fieldname": "is_active",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Active"
+  },
+  {
+   "default": "0",
+   "description": "If checked, the shared link will create a NEW record instead of updating an existing one",
+   "fieldname": "is_public_form",
+   "fieldtype": "Check",
+   "label": "Is Public Form"
+  },
+  {
+   "fieldname": "preview_section",
+   "fieldtype": "Section Break",
+   "label": "Preview",
+   "collapsible": 1
+  },
+  {
+   "fieldname": "preview_document",
+   "fieldtype": "Dynamic Link",
+   "label": "Preview Document",
+   "options": "reference_doctype",
+   "description": "Select a document to preview the template with real data"
+  },
+  {
+   "fieldname": "preview_html",
+   "fieldtype": "HTML",
+   "label": "Preview"
+  },
+  {
+   "fieldname": "template_content_section",
+   "fieldtype": "Section Break",
+   "label": "Template Content"
+  },
+  {
+   "description": "HTML + Jinja2 template. Use {{ doc.field_name }} for merge fields, {{ ak_input(...) }} for interactive fields.",
+   "fieldname": "template_html",
+   "fieldtype": "Code",
+   "label": "Template HTML",
+   "options": "HTML"
+  },
+  {
+   "fieldname": "custom_css",
+   "fieldtype": "Code",
+   "label": "Custom CSS",
+   "options": "CSS"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "header_footer_section",
+   "fieldtype": "Section Break",
+   "label": "Header, Footer & Cover Page"
+  },
+  {
+   "fieldname": "header_html",
+   "fieldtype": "Code",
+   "label": "Header HTML",
+   "options": "HTML"
+  },
+  {
+   "fieldname": "footer_html",
+   "fieldtype": "Code",
+   "label": "Footer HTML",
+   "options": "HTML"
+  },
+  {
+   "fieldname": "cover_page_html",
+   "fieldtype": "Code",
+   "label": "Cover Page HTML",
+   "options": "HTML"
+  },
+  {
+   "fieldname": "interactive_fields_section",
+   "fieldtype": "Section Break",
+   "label": "Interactive Fields"
+  },
+  {
+   "fieldname": "fields",
+   "fieldtype": "Table",
+   "label": "Fields",
+   "options": "AK Template Field"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "page_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Page Settings"
+  },
+  {
+   "default": "A4",
+   "fieldname": "page_format",
+   "fieldtype": "Select",
+   "label": "Page Format",
+   "options": "A4\nLetter\nLegal"
+  },
+  {
+   "fieldname": "column_break_page",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "15",
+   "fieldname": "top_margin",
+   "fieldtype": "Float",
+   "label": "Top Margin (mm)"
+  },
+  {
+   "default": "15",
+   "fieldname": "bottom_margin",
+   "fieldtype": "Float",
+   "label": "Bottom Margin (mm)"
+  },
+  {
+   "default": "15",
+   "fieldname": "left_margin",
+   "fieldtype": "Float",
+   "label": "Left Margin (mm)"
+  },
+  {
+   "default": "15",
+   "fieldname": "right_margin",
+   "fieldtype": "Float",
+   "label": "Right Margin (mm)"
+  },
+  {
+   "fieldname": "online_document_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Online Document Settings"
+  },
+  {
+   "default": "7",
+   "description": "Default number of days before the shared link expires",
+   "fieldname": "expires_in_days",
+   "fieldtype": "Int",
+   "label": "Expires In (Days)"
+  },
+  {
+   "default": "1",
+   "fieldname": "track_opens",
+   "fieldtype": "Check",
+   "label": "Track Opens"
+  },
+  {
+   "fieldname": "column_break_online",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "show_accept_decline",
+   "fieldtype": "Check",
+   "label": "Show Accept/Decline Buttons"
+  },
+  {
+   "default": "0",
+   "fieldname": "lock_after_submission",
+   "fieldtype": "Check",
+   "label": "Lock After Submission"
+  },
+  {
+   "default": "0",
+   "fieldname": "disable_access_after_submission",
+   "fieldtype": "Check",
+   "label": "Disable Access After Submission"
+  },
+  {
+   "fieldname": "success_message",
+   "fieldtype": "Small Text",
+   "label": "Success Message"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "email_settings_section",
+   "fieldtype": "Section Break",
+   "label": "Email Settings"
+  },
+  {
+   "description": "Jinja2 template. Use {{ doc.field_name }} for merge fields.",
+   "fieldname": "email_subject",
+   "fieldtype": "Data",
+   "label": "Email Subject"
+  },
+  {
+   "description": "HTML + Jinja2. Use {{ share_url }} for the document link.",
+   "fieldname": "email_body_html",
+   "fieldtype": "Code",
+   "label": "Email Body HTML",
+   "options": "HTML"
+  },
+  {
+   "default": "0",
+   "fieldname": "attach_pdf",
+   "fieldtype": "Check",
+   "label": "Attach PDF Copy"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "notifications_section",
+   "fieldtype": "Section Break",
+   "label": "Notifications & Reminders"
+  },
+  {
+   "default": "0",
+   "fieldname": "notify_on_view",
+   "fieldtype": "Check",
+   "label": "Notify Sender on View",
+   "description": "Send a notification to the sender when the recipient opens the document"
+  },
+  {
+   "default": "1",
+   "fieldname": "notify_on_response",
+   "fieldtype": "Check",
+   "label": "Notify Sender on Response",
+   "description": "Send a notification to the sender when the recipient submits a response"
+  },
+  {
+   "fieldname": "column_break_notify",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "fieldname": "reminder_days",
+   "fieldtype": "Int",
+   "label": "Send Reminder After (Days)",
+   "description": "Automatically resend email if no response after this many days. Set 0 to disable."
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "automation_section",
+   "fieldtype": "Section Break",
+   "label": "Automation"
+  },
+  {
+   "default": "",
+   "fieldname": "auto_send_on",
+   "fieldtype": "Select",
+   "label": "Auto Send On",
+   "options": "\non_insert\non_update\non_submit"
+  },
+  {
+   "description": "Field name on the DocType that contains the recipient email address",
+   "fieldname": "auto_send_to_field",
+   "fieldtype": "Data",
+   "label": "Auto Send To Field"
+  },
+  {
+   "description": "Optional: only auto-send for a specific DocType if reference_doctype is broad",
+   "fieldname": "auto_send_doctype_filter",
+   "fieldtype": "Data",
+   "label": "Auto Send DocType Filter"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-02-20 00:00:00",
+ "modified_by": "Administrator",
+ "module": "Doc Designer AK",
+ "name": "AK Document Template",
+ "naming_rule": "By fieldname",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

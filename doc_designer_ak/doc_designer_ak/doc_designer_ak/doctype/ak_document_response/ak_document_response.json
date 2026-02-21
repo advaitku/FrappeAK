@@ -1,0 +1,139 @@
+{
+ "actions": [],
+ "autoname": "format:AK-DR-{#####}",
+ "creation": "2026-02-20 00:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "document_share",
+  "template",
+  "response_type",
+  "submitted_at",
+  "column_break_1",
+  "reference_doctype",
+  "reference_name",
+  "created_new_record",
+  "details_section",
+  "ip_address",
+  "user_agent",
+  "data_section",
+  "response_data",
+  "fields_updated_on_original"
+ ],
+ "fields": [
+  {
+   "fieldname": "document_share",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Document Share",
+   "options": "AK Document Share",
+   "reqd": 1
+  },
+  {
+   "fieldname": "template",
+   "fieldtype": "Link",
+   "label": "Template",
+   "options": "AK Document Template"
+  },
+  {
+   "fieldname": "response_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Response Type",
+   "options": "Submitted\nAccepted\nDeclined"
+  },
+  {
+   "fieldname": "submitted_at",
+   "fieldtype": "Datetime",
+   "in_list_view": 1,
+   "label": "Submitted At"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "reference_doctype",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Reference DocType"
+  },
+  {
+   "fieldname": "reference_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Reference Name"
+  },
+  {
+   "description": "Name of the newly created record (for public form mode)",
+   "fieldname": "created_new_record",
+   "fieldtype": "Data",
+   "label": "Created New Record"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "details_section",
+   "fieldtype": "Section Break",
+   "label": "Details"
+  },
+  {
+   "fieldname": "ip_address",
+   "fieldtype": "Data",
+   "label": "IP Address",
+   "read_only": 1
+  },
+  {
+   "fieldname": "user_agent",
+   "fieldtype": "Small Text",
+   "label": "User Agent",
+   "read_only": 1
+  },
+  {
+   "fieldname": "data_section",
+   "fieldtype": "Section Break",
+   "label": "Response Data"
+  },
+  {
+   "description": "JSON of all submitted field values",
+   "fieldname": "response_data",
+   "fieldtype": "Code",
+   "label": "Response Data",
+   "options": "JSON",
+   "read_only": 1
+  },
+  {
+   "description": "JSON of fields that were updated on the original document",
+   "fieldname": "fields_updated_on_original",
+   "fieldtype": "Code",
+   "label": "Fields Updated on Original",
+   "options": "JSON",
+   "read_only": 1
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "links": [],
+ "modified": "2026-02-20 00:00:00",
+ "modified_by": "Administrator",
+ "module": "Doc Designer AK",
+ "name": "AK Document Response",
+ "naming_rule": "Expression (old style)",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 0,
+   "delete": 0,
+   "email": 1,
+   "export": 1,
+   "print": 1,
+   "read": 1,
+   "report": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 0
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 0
+}

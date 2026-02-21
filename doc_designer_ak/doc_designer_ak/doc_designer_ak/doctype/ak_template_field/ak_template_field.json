@@ -1,0 +1,97 @@
+{
+ "actions": [],
+ "creation": "2026-02-20 00:00:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "field_name",
+  "field_label",
+  "field_type",
+  "options",
+  "column_break_1",
+  "is_existing_field",
+  "is_editable",
+  "is_mandatory",
+  "default_value",
+  "column"
+ ],
+ "fields": [
+  {
+   "fieldname": "field_name",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Field Name",
+   "reqd": 1
+  },
+  {
+   "fieldname": "field_label",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "Field Label"
+  },
+  {
+   "default": "Data",
+   "fieldname": "field_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Field Type",
+   "options": "Data\nText\nSmall Text\nInt\nFloat\nCurrency\nDate\nDatetime\nCheck\nSelect",
+   "reqd": 1
+  },
+  {
+   "description": "For Select: one option per line",
+   "fieldname": "options",
+   "fieldtype": "Small Text",
+   "label": "Options"
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "default": "0",
+   "description": "If checked, this field maps to a real field on the DocType and will be pre-filled and written back on submit",
+   "fieldname": "is_existing_field",
+   "fieldtype": "Check",
+   "in_list_view": 1,
+   "label": "Is Existing Field"
+  },
+  {
+   "default": "1",
+   "fieldname": "is_editable",
+   "fieldtype": "Check",
+   "label": "Is Editable"
+  },
+  {
+   "default": "0",
+   "fieldname": "is_mandatory",
+   "fieldtype": "Check",
+   "label": "Is Mandatory"
+  },
+  {
+   "fieldname": "default_value",
+   "fieldtype": "Data",
+   "label": "Default Value"
+  },
+  {
+   "default": "Full Width",
+   "fieldname": "column",
+   "fieldtype": "Select",
+   "label": "Column",
+   "options": "Full Width\nLeft\nRight"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-02-20 00:00:00",
+ "modified_by": "Administrator",
+ "module": "Doc Designer AK",
+ "name": "AK Template Field",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}
