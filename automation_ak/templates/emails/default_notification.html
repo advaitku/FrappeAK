@@ -1,0 +1,33 @@
+{% if header %}
+<h2 style="margin:0 0 12px; font-size:18px; color:#333;">{{ header }}</h2>
+{% endif %}
+
+<div style="font-family:Arial, sans-serif; font-size:14px; color:#555; line-height:1.6;">
+{{ body }}
+</div>
+
+{% if doc %}
+<hr style="border:none; border-top:1px solid #eee; margin:20px 0;">
+<table style="font-family:Arial, sans-serif; font-size:13px; color:#888; width:100%; border-collapse:collapse;">
+	<tr>
+		<td style="padding:4px 8px;"><strong>Document:</strong></td>
+		<td style="padding:4px 8px;">{{ doc.doctype }} — {{ doc.name }}</td>
+	</tr>
+	{% if doc.get("owner") %}
+	<tr>
+		<td style="padding:4px 8px;"><strong>Created by:</strong></td>
+		<td style="padding:4px 8px;">{{ doc.owner }}</td>
+	</tr>
+	{% endif %}
+	{% if doc.get("modified_by") %}
+	<tr>
+		<td style="padding:4px 8px;"><strong>Modified by:</strong></td>
+		<td style="padding:4px 8px;">{{ doc.modified_by }}</td>
+	</tr>
+	{% endif %}
+</table>
+{% endif %}
+
+<p style="font-size:11px; color:#aaa; margin-top:20px;">
+	Sent by AutomationAK
+</p>

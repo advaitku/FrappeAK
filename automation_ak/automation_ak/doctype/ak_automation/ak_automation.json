@@ -1,0 +1,223 @@
+{
+  "actions": [],
+  "autoname": "AK-AUTO-.#####",
+  "creation": "2026-02-20 00:00:00",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "title",
+    "enabled",
+    "cb_top",
+    "reference_doctype",
+    "description",
+    "sb_trigger",
+    "trigger_type",
+    "trigger_field",
+    "cron_expression",
+    "button_label",
+    "cb_trigger",
+    "recurrence",
+    "sb_all_conditions",
+    "all_conditions",
+    "sb_any_conditions",
+    "any_conditions",
+    "sb_actions",
+    "actions",
+    "sb_field_updates",
+    "field_updates",
+    "sb_stats",
+    "last_executed",
+    "execution_count",
+    "cb_stats",
+    "last_error"
+  ],
+  "fields": [
+    {
+      "description": "A short, descriptive name for this automation",
+      "fieldname": "title",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Workflow Name",
+      "reqd": 1
+    },
+    {
+      "default": "1",
+      "fieldname": "enabled",
+      "fieldtype": "Check",
+      "in_list_view": 1,
+      "label": "Active"
+    },
+    {
+      "fieldname": "cb_top",
+      "fieldtype": "Column Break"
+    },
+    {
+      "description": "The DocType this automation runs on (e.g. Sales Order, ToDo)",
+      "fieldname": "reference_doctype",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Target Module",
+      "options": "DocType",
+      "reqd": 1
+    },
+    {
+      "fieldname": "description",
+      "fieldtype": "Small Text",
+      "label": "Description"
+    },
+    {
+      "fieldname": "sb_trigger",
+      "fieldtype": "Section Break",
+      "label": "Trigger"
+    },
+    {
+      "default": "On Create",
+      "fieldname": "trigger_type",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Trigger Workflow On",
+      "options": "On Create\nOn Update (includes Create)\nTime Interval\nMacro (Button)",
+      "reqd": 1
+    },
+    {
+      "depends_on": "eval:doc.trigger_type=='On Update (includes Create)'",
+      "description": "Only fire when this specific field changes",
+      "fieldname": "trigger_field",
+      "fieldtype": "Select",
+      "label": "Watch Field (optional)"
+    },
+    {
+      "depends_on": "eval:doc.trigger_type=='Time Interval'",
+      "description": "e.g. 0 9 * * 1 (every Monday at 9 AM)",
+      "fieldname": "cron_expression",
+      "fieldtype": "Data",
+      "label": "Cron Expression"
+    },
+    {
+      "depends_on": "eval:doc.trigger_type=='Macro (Button)'",
+      "description": "Text shown on the button in the document toolbar",
+      "fieldname": "button_label",
+      "fieldtype": "Data",
+      "label": "Button Label"
+    },
+    {
+      "fieldname": "cb_trigger",
+      "fieldtype": "Column Break"
+    },
+    {
+      "default": "Every Time Conditions Are Met",
+      "description": "Controls whether this automation fires repeatedly or only once per document",
+      "fieldname": "recurrence",
+      "fieldtype": "Select",
+      "label": "Recurrence",
+      "options": "Every Time Conditions Are Met\nOnly First Time Conditions Are Met"
+    },
+    {
+      "description": "All of these conditions must be true (AND)",
+      "fieldname": "sb_all_conditions",
+      "fieldtype": "Section Break",
+      "label": "Workflow Condition"
+    },
+    {
+      "fieldname": "all_conditions",
+      "fieldtype": "Table",
+      "label": "All Conditions (All must match)",
+      "options": "AK Automation Condition"
+    },
+    {
+      "fieldname": "sb_any_conditions",
+      "fieldtype": "Section Break",
+      "label": "Any Conditions (At least one must match)"
+    },
+    {
+      "fieldname": "any_conditions",
+      "fieldtype": "Table",
+      "label": "Any Conditions",
+      "options": "AK Automation Condition"
+    },
+    {
+      "fieldname": "sb_actions",
+      "fieldtype": "Section Break",
+      "label": "Workflow Actions"
+    },
+    {
+      "fieldname": "actions",
+      "fieldtype": "Table",
+      "label": "Actions",
+      "options": "AK Automation Action"
+    },
+    {
+      "collapsible": 1,
+      "description": "Field update rows linked to Update Fields actions above",
+      "fieldname": "sb_field_updates",
+      "fieldtype": "Section Break",
+      "label": "Field Updates Detail"
+    },
+    {
+      "fieldname": "field_updates",
+      "fieldtype": "Table",
+      "label": "Field Updates",
+      "options": "AK Field Update"
+    },
+    {
+      "collapsible": 1,
+      "fieldname": "sb_stats",
+      "fieldtype": "Section Break",
+      "label": "Execution Stats"
+    },
+    {
+      "fieldname": "last_executed",
+      "fieldtype": "Datetime",
+      "label": "Last Executed",
+      "read_only": 1
+    },
+    {
+      "default": "0",
+      "fieldname": "execution_count",
+      "fieldtype": "Int",
+      "label": "Execution Count",
+      "read_only": 1
+    },
+    {
+      "fieldname": "cb_stats",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "last_error",
+      "fieldtype": "Small Text",
+      "label": "Last Error",
+      "read_only": 1
+    }
+  ],
+  "links": [
+    {
+      "link_doctype": "AK Automation Log",
+      "link_fieldname": "automation"
+    }
+  ],
+  "modified": "2026-02-20 00:00:00",
+  "modified_by": "Administrator",
+  "module": "Automation AK",
+  "name": "AK Automation",
+  "naming_rule": "Expression (old style)",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "System Manager",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "search_fields": "title,reference_doctype,trigger_type",
+  "sort_field": "modified",
+  "sort_order": "DESC",
+  "title_field": "title",
+  "track_changes": 1
+}

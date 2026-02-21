@@ -1,0 +1,117 @@
+{
+  "actions": [],
+  "autoname": "AK-LOG-.#####",
+  "creation": "2026-02-20 00:00:00",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "automation",
+    "automation_title",
+    "reference_doctype",
+    "reference_name",
+    "cb_log1",
+    "trigger_type",
+    "status",
+    "executed_at",
+    "execution_time_ms",
+    "sb_detail",
+    "actions_executed",
+    "error_traceback"
+  ],
+  "fields": [
+    {
+      "fieldname": "automation",
+      "fieldtype": "Link",
+      "in_list_view": 1,
+      "label": "Automation",
+      "options": "AK Automation",
+      "reqd": 1
+    },
+    {
+      "fetch_from": "automation.title",
+      "fieldname": "automation_title",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Automation Title",
+      "read_only": 1
+    },
+    {
+      "fieldname": "reference_doctype",
+      "fieldtype": "Link",
+      "label": "Document Type",
+      "options": "DocType"
+    },
+    {
+      "fieldname": "reference_name",
+      "fieldtype": "Dynamic Link",
+      "label": "Document Name",
+      "options": "reference_doctype"
+    },
+    {
+      "fieldname": "cb_log1",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "trigger_type",
+      "fieldtype": "Data",
+      "label": "Trigger Type"
+    },
+    {
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Status",
+      "options": "\nSuccess\nFailed\nSkipped"
+    },
+    {
+      "default": "Now",
+      "fieldname": "executed_at",
+      "fieldtype": "Datetime",
+      "in_list_view": 1,
+      "label": "Executed At"
+    },
+    {
+      "description": "How long the automation took to run",
+      "fieldname": "execution_time_ms",
+      "fieldtype": "Float",
+      "label": "Execution Time (ms)"
+    },
+    {
+      "collapsible": 1,
+      "fieldname": "sb_detail",
+      "fieldtype": "Section Break",
+      "label": "Details"
+    },
+    {
+      "description": "JSON summary of each action that was run and its result",
+      "fieldname": "actions_executed",
+      "fieldtype": "Code",
+      "label": "Actions Executed",
+      "options": "JSON"
+    },
+    {
+      "description": "Full Python traceback if the automation failed",
+      "fieldname": "error_traceback",
+      "fieldtype": "Code",
+      "label": "Error Traceback"
+    }
+  ],
+  "in_create": 1,
+  "links": [],
+  "modified": "2026-02-20 00:00:00",
+  "modified_by": "Administrator",
+  "module": "Automation AK",
+  "name": "AK Automation Log",
+  "naming_rule": "Expression (old style)",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "read": 1,
+      "role": "System Manager"
+    }
+  ],
+  "sort_field": "executed_at",
+  "sort_order": "DESC",
+  "title_field": "automation_title",
+  "track_changes": 0
+}

@@ -1,0 +1,87 @@
+{
+  "actions": [],
+  "creation": "2026-02-20 00:00:00",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "parent_action_idx",
+    "target_field",
+    "value_type",
+    "display_summary",
+    "cb_fu",
+    "value",
+    "source_field",
+    "function_name",
+    "days_offset"
+  ],
+  "fields": [
+    {
+      "fieldname": "parent_action_idx",
+      "fieldtype": "Int",
+      "label": "Action Row Index",
+      "in_list_view": 0
+    },
+    {
+      "fieldname": "target_field",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Field",
+      "reqd": 1
+    },
+    {
+      "fieldname": "value_type",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Set To",
+      "options": "Static Value\nExpression\nUse Field\nUse Function\nToday\nToday + N Days\nToday - N Days\nCurrent User\nClear",
+      "reqd": 1
+    },
+    {
+      "fieldname": "display_summary",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Value",
+      "read_only": 1
+    },
+    {
+      "fieldname": "cb_fu",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "value",
+      "fieldtype": "Small Text",
+      "hidden": 1,
+      "in_list_view": 0,
+      "label": "Raw Value"
+    },
+    {
+      "depends_on": "eval:doc.value_type=='Use Field'",
+      "fieldname": "source_field",
+      "fieldtype": "Select",
+      "label": "Source Field"
+    },
+    {
+      "depends_on": "eval:doc.value_type=='Use Function'",
+      "fieldname": "function_name",
+      "fieldtype": "Select",
+      "label": "Function",
+      "options": "\nconcat\nuppercase\nlowercase\ntrim\nlength\nround\nabs\nceil\nfloor"
+    },
+    {
+      "depends_on": "eval:['Today + N Days','Today - N Days'].includes(doc.value_type)",
+      "fieldname": "days_offset",
+      "fieldtype": "Int",
+      "label": "Days Offset"
+    }
+  ],
+  "istable": 1,
+  "links": [],
+  "modified": "2026-02-20 00:00:00",
+  "modified_by": "Administrator",
+  "module": "Automation AK",
+  "name": "AK Field Update",
+  "owner": "Administrator",
+  "permissions": [],
+  "sort_field": "modified",
+  "sort_order": "DESC"
+}
