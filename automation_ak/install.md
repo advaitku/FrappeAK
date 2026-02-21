@@ -1,93 +1,92 @@
-# Installing AutomationAK on a Frappe Site
+# Installing AutomationAK + Doc Designer AK
 
-Step-by-step guide for installing AutomationAK on an existing Frappe/ERPNext bench.
+Step-by-step guide for installing both apps on an existing Frappe/ERPNext bench (v16+).
+
+Both apps live in the same repository. One clone gives you both.
 
 ## Prerequisites
 
-- A working Frappe bench (v14 or v15)
+- A working Frappe bench (v16)
 - A site already created (`bench new-site` done)
-- Git access to this repository
+- Git installed on the server
 
-## Step 1: Get the app
+---
 
-From your bench directory:
+## Step 1: Clone the repository
+
+From your bench directory, clone into `apps/` under the name `automation_ak`:
+
+```bash
+cd ~/frappe-bench/apps
+git clone https://github.com/advaitku/FrappeAK.git automation_ak
+```
+
+Then create a symlink so bench can also see `doc_designer_ak` (which lives as a subdirectory of the same repo):
+
+```bash
+ln -s ~/frappe-bench/apps/automation_ak/doc_designer_ak ~/frappe-bench/apps/doc_designer_ak
+```
+
+---
+
+## Step 2: Install Python packages
+
+Register both apps in the bench virtualenv:
 
 ```bash
 cd ~/frappe-bench
-bench get-app https://github.com/YOUR_USERNAME/FrappeAK.git
+./env/bin/pip install -e apps/automation_ak
+./env/bin/pip install -e apps/doc_designer_ak
 ```
 
-> **If `bench get-app` fails with a directory naming error**, the repo name (`FrappeAK`) doesn't match the app name (`automation_ak`). In that case, install manually:
->
-> ```bash
-> cd ~/frappe-bench/apps
-> git clone https://github.com/YOUR_USERNAME/FrappeAK.git automation_ak
-> cd ~/frappe-bench
-> bench setup requirements --apps automation_ak
-> ```
->
-> Then add `automation_ak` to `sites/apps.txt` (on its own line, after `frappe`).
+---
 
-## Step 2: Install on your site
+## Step 3: Install apps on your site
 
 ```bash
 bench --site YOUR_SITE install-app automation_ak
+bench --site YOUR_SITE install-app doc_designer_ak
 ```
 
-This creates all the database tables for the 6 DocTypes (AK Automation, AK Automation Condition, AK Automation Action, AK Field Update, AK Automation Log, AK Automation Settings).
+This creates all database tables for both apps.
 
-## Step 3: Build frontend assets
+---
+
+## Step 4: Build frontend assets
 
 ```bash
 bench build --app automation_ak
+bench build --app doc_designer_ak
 ```
 
-This compiles the `ak_buttons.bundle.js` which injects macro buttons on forms.
-
-## Step 4: Run migrations
-
-```bash
-bench --site YOUR_SITE migrate
-```
-
-This syncs the DocType schemas to the database and registers hooks.
+---
 
 ## Step 5: Restart
 
-If running in production (Supervisor/systemd):
+Production (Supervisor/systemd):
 
 ```bash
 bench restart
 ```
 
-If running in development:
+Development:
 
 ```bash
 bench start
 ```
 
-## Step 6: Verify
+---
 
-1. Open your site in a browser
-2. Log in as Administrator
-3. Go to the URL bar and type **AK Automation** -- you should see the DocType in search results
-4. Go to **AK Automation Settings** to configure logging and WhatsApp credentials (optional)
+## Verify
 
-## Creating Your First Automation
+1. Log in as Administrator
+2. Search for **AK Automation** — the DocType should appear
+3. Search for **AK Doc Template** — the Doc Designer DocType should appear
+4. Open **AK Automation Settings** to configure logging and optional WhatsApp credentials
 
-1. Go to **AK Automation > New**
-2. Set a **Title** (e.g. "Set priority on new ToDos")
-3. Pick a **Reference DocType** (e.g. `ToDo`)
-4. Choose a **Trigger Type** (e.g. `On Create`)
-5. Add a condition: Field = `status`, Operator = `is`, Value = `Open`
-6. Add an action: Type = `Update Fields`, set `priority` to `High`
-7. Save and enable
-8. Create a new ToDo with status "Open" -- the priority should auto-set to "High"
-9. Check **AK Automation Log** to see the execution record
+---
 
 ## Updating
-
-When you pull new code:
 
 ```bash
 cd ~/frappe-bench/apps/automation_ak
@@ -96,46 +95,55 @@ git pull
 cd ~/frappe-bench
 bench --site YOUR_SITE migrate
 bench build --app automation_ak
+bench build --app doc_designer_ak
 bench restart  # if production
 ```
+
+The `doc_designer_ak` symlink picks up changes automatically since it points inside the same repo.
+
+---
 
 ## Uninstalling
 
 ```bash
+bench --site YOUR_SITE uninstall-app doc_designer_ak
 bench --site YOUR_SITE uninstall-app automation_ak
+
+# Remove the symlink and the cloned repo
+unlink ~/frappe-bench/apps/doc_designer_ak
 bench remove-app automation_ak
 ```
 
-This drops the app's database tables and removes it from the bench.
+---
 
 ## Troubleshooting
 
-### "No module named 'automation_ak.automationak'"
+### "No module named 'automation_ak'"
 
-The `modules.txt` file must contain `Automation AK` (with a space). Frappe's `scrub()` converts this to `automation_ak` to find the Python module. If it says `AutomationAK` (no space), it looks for `automationak` which doesn't exist.
-
-### "App automation_ak not in apps.txt"
-
-Add `automation_ak` on its own line in `~/frappe-bench/sites/apps.txt`:
-
-```
-frappe
-automation_ak
-```
-
-Make sure there's a newline after `frappe` -- otherwise the entries get concatenated.
-
-### Redis not running / Services not running
-
-Bench manages its own Redis instances. Run `bench start` in development mode, or ensure Supervisor/systemd services are running in production. The `bench migrate` command requires Redis to be available.
-
-### "FileNotFoundError: ./apps/automation_ak/automation_ak/__init__.py"
-
-The app directory name must be `automation_ak`, not the git repo name. If you cloned as `FrappeAK`, rename or symlink it:
+The virtualenv pip install was skipped or failed. Run:
 
 ```bash
-cd ~/frappe-bench/apps
-mv FrappeAK automation_ak
-# or
-ln -s /path/to/FrappeAK automation_ak
+./env/bin/pip install -e apps/automation_ak
+./env/bin/pip install -e apps/doc_designer_ak
+```
+
+### "No module named 'doc_designer_ak'"
+
+The symlink is missing. Recreate it:
+
+```bash
+ln -s ~/frappe-bench/apps/automation_ak/doc_designer_ak ~/frappe-bench/apps/doc_designer_ak
+./env/bin/pip install -e apps/doc_designer_ak
+```
+
+### "App not in apps.txt"
+
+Run `bench --site YOUR_SITE install-app <app_name>` — bench manages `apps.txt` automatically, do not edit it by hand.
+
+### PackageLoader / Jinja template errors
+
+Usually means the symlink is broken or pip install was not run after moving files. Re-run Steps 2 and then:
+
+```bash
+bench --site YOUR_SITE migrate
 ```

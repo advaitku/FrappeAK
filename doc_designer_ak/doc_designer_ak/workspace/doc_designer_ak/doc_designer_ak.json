@@ -6,7 +6,7 @@
  "doctype": "Workspace",
  "for_user": "",
  "hide_custom": 0,
- "icon": "file",
+ "icon": "small-file",
  "idx": 0,
  "is_hidden": 0,
  "label": "Doc Designer AK",
@@ -16,7 +16,7 @@
    "type": "Card Break"
   },
   {
-   "icon": "file",
+   "icon": "small-file",
    "label": "AK Document Template",
    "link_to": "AK Document Template",
    "link_type": "DocType",
@@ -27,14 +27,14 @@
    "type": "Card Break"
   },
   {
-   "icon": "share",
+   "icon": "link-url",
    "label": "AK Document Share",
    "link_to": "AK Document Share",
    "link_type": "DocType",
    "type": "Link"
   },
   {
-   "icon": "list",
+   "icon": "list-alt",
    "label": "AK Document Response",
    "link_to": "AK Document Response",
    "link_type": "DocType",
@@ -45,7 +45,7 @@
    "type": "Card Break"
   },
   {
-   "icon": "eye",
+   "icon": "unhide",
    "label": "AK Document View Log",
    "link_to": "AK Document View Log",
    "link_type": "DocType",
@@ -76,28 +76,28 @@
  "shortcuts": [
   {
    "color": "Blue",
-   "icon": "file",
+   "icon": "small-file",
    "label": "AK Document Template",
    "link_to": "AK Document Template",
    "type": "DocType"
   },
   {
    "color": "Green",
-   "icon": "share",
+   "icon": "link-url",
    "label": "AK Document Share",
    "link_to": "AK Document Share",
    "type": "DocType"
   },
   {
    "color": "Orange",
-   "icon": "list",
+   "icon": "list-alt",
    "label": "AK Document Response",
    "link_to": "AK Document Response",
    "type": "DocType"
   },
   {
    "color": "Grey",
-   "icon": "eye",
+   "icon": "unhide",
    "label": "AK Document View Log",
    "link_to": "AK Document View Log",
    "type": "DocType"

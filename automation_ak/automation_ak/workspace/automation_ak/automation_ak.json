@@ -87,7 +87,7 @@
   {
    "color": "Grey",
    "doc_view": "List",
-   "icon": "list",
+   "icon": "list-alt",
    "label": "AK Automation Log",
    "link_to": "AK Automation Log",
    "type": "DocType"

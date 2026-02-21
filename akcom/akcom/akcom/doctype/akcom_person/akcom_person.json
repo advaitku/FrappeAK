@@ -1,0 +1,111 @@
+{
+  "actions": [],
+  "autoname": "field:person_name",
+  "creation": "2026-02-21 00:00:00",
+  "doctype": "DocType",
+  "engine": "InnoDB",
+  "field_order": [
+    "person_name",
+    "company",
+    "cb_top",
+    "support_percent",
+    "status",
+    "is_active",
+    "sb_bank",
+    "bank",
+    "sb_remarks",
+    "remarks"
+  ],
+  "fields": [
+    {
+      "bold": 1,
+      "fieldname": "person_name",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Person Name",
+      "reqd": 1
+    },
+    {
+      "fieldname": "company",
+      "fieldtype": "Data",
+      "in_list_view": 1,
+      "label": "Company",
+      "reqd": 1
+    },
+    {
+      "fieldname": "cb_top",
+      "fieldtype": "Column Break"
+    },
+    {
+      "fieldname": "support_percent",
+      "fieldtype": "Percent",
+      "label": "Support %"
+    },
+    {
+      "fieldname": "status",
+      "fieldtype": "Select",
+      "in_list_view": 1,
+      "label": "Status",
+      "options": "\nActive\nInactive\nOn Hold"
+    },
+    {
+      "default": "0",
+      "fieldname": "is_active",
+      "fieldtype": "Check",
+      "label": "Active"
+    },
+    {
+      "fieldname": "sb_bank",
+      "fieldtype": "Section Break",
+      "label": "Bank Balance"
+    },
+    {
+      "fieldname": "bank",
+      "fieldtype": "Currency",
+      "in_list_view": 1,
+      "label": "Bank",
+      "read_only": 1
+    },
+    {
+      "fieldname": "sb_remarks",
+      "fieldtype": "Section Break",
+      "label": "Remarks"
+    },
+    {
+      "fieldname": "remarks",
+      "fieldtype": "Small Text",
+      "label": "Remarks"
+    }
+  ],
+  "links": [
+    {
+      "link_doctype": "AKCOM Ledger Entry",
+      "link_fieldname": "person"
+    }
+  ],
+  "modified": "2026-02-21 00:00:00",
+  "modified_by": "Administrator",
+  "module": "AKCOM",
+  "name": "AKCOM Person",
+  "naming_rule": "By fieldname",
+  "owner": "Administrator",
+  "permissions": [
+    {
+      "create": 1,
+      "delete": 1,
+      "email": 1,
+      "export": 1,
+      "print": 1,
+      "read": 1,
+      "report": 1,
+      "role": "AKCOM User",
+      "share": 1,
+      "write": 1
+    }
+  ],
+  "search_fields": "person_name,company",
+  "sort_field": "person_name",
+  "sort_order": "ASC",
+  "title_field": "person_name",
+  "track_changes": 1
+}
