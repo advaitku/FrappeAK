@@ -18,6 +18,10 @@ def get_context(context):
     context.base_template_path = "templates/includes/shared_base.html"
     context.no_breadcrumbs = True
     context.show_sidebar = False
+    try:
+        context.csrf_token = frappe.sessions.get_csrf_token()
+    except Exception:
+        context.csrf_token = frappe.generate_hash()
 
     key = frappe.form_dict.get("key")
     if not key:

@@ -1,127 +1,142 @@
 /**
- * Adds "Share via Document Designer" button to all Frappe forms
+ * Adds "Share via Doc Designer" button to all Frappe forms
  * that have an AK Document Template configured for their DocType.
  */
-frappe.ui.form.on_doctype_event("*", "refresh", function (frm) {
-    if (frm.is_new()) return;
 
-    // Check if templates exist for this DocType
-    frappe.xcall(
-        "frappe.client.get_count",
-        {
-            doctype: "AK Document Template",
-            filters: {
-                reference_doctype: frm.doc.doctype,
-                is_active: 1,
-            },
-        }
-    ).then((count) => {
-        if (!count) return;
+let _dd_template_cache = {};
+const _DD_SKIP_DOCTYPES = [
+    "AK Document Template", "AK Document Share",
+    "AK Document Response", "AK Document View Log",
+    "AK Document Settings",
+];
 
-        // Remove existing button to avoid duplicates
-        frm.remove_custom_button(__("Share via Document Designer"), __("Menu"));
-
-        frm.add_custom_button(
-            __("Share via Document Designer"),
-            () => showShareDialog(frm),
-            __("Menu")
-        );
-    });
+// Use the jQuery form-refresh event — the same reliable pattern
+// that automation_ak uses. frappe.ui.form.on_doctype_event does
+// not exist in Frappe v16.
+$(document).on("form-refresh", function (e, frm) {
+    if (!frm || !frm.doc || frm.doc.__islocal) return;
+    if (_DD_SKIP_DOCTYPES.includes(frm.doc.doctype)) return;
+    _dd_check_and_add_button(frm);
 });
 
-function showShareDialog(frm) {
-    // Fetch available templates for this DocType
+function _dd_check_and_add_button(frm) {
+    const dt = frm.doc.doctype;
+
+    if (_dd_template_cache[dt] !== undefined) {
+        if (_dd_template_cache[dt].length) {
+            _dd_add_button(frm, _dd_template_cache[dt]);
+        }
+        return;
+    }
+
     frappe.xcall("frappe.client.get_list", {
         doctype: "AK Document Template",
-        filters: {
-            reference_doctype: frm.doc.doctype,
-            is_active: 1,
-        },
+        filters: { reference_doctype: dt, is_active: 1 },
         fields: ["name", "template_name", "expires_in_days"],
+        limit_page_length: 0,
     }).then((templates) => {
-        if (!templates || !templates.length) {
-            frappe.msgprint(__("No active templates found for {0}", [frm.doc.doctype]));
-            return;
+        _dd_template_cache[dt] = templates || [];
+        if (_dd_template_cache[dt].length) {
+            _dd_add_button(frm, _dd_template_cache[dt]);
         }
-
-        const templateOptions = templates.map((t) => t.name);
-        const defaultExpiry = templates[0].expires_in_days || 7;
-
-        const d = new frappe.ui.Dialog({
-            title: __("Share Document"),
-            fields: [
-                {
-                    fieldname: "template",
-                    fieldtype: "Select",
-                    label: __("Template"),
-                    options: templateOptions.join("\n"),
-                    default: templateOptions[0],
-                    reqd: 1,
-                    onchange: function () {
-                        const selected = templates.find((t) => t.name === d.get_value("template"));
-                        if (selected) {
-                            d.set_value("expires_in_days", selected.expires_in_days || 7);
-                        }
-                    },
-                },
-                {
-                    fieldname: "recipient_email",
-                    fieldtype: "Data",
-                    label: __("Recipient Email"),
-                    options: "Email",
-                },
-                {
-                    fieldname: "expires_in_days",
-                    fieldtype: "Int",
-                    label: __("Expires In (Days)"),
-                    default: defaultExpiry,
-                    reqd: 1,
-                },
-                {
-                    fieldname: "send_email",
-                    fieldtype: "Check",
-                    label: __("Send Email Now"),
-                    default: 0,
-                },
-            ],
-            primary_action_label: __("Create Share Link"),
-            primary_action: (values) => {
-                d.hide();
-                frappe.call({
-                    method: "doc_designer_ak.api.create_share",
-                    args: {
-                        template: values.template,
-                        reference_doctype: frm.doc.doctype,
-                        reference_name: frm.doc.name,
-                        recipient_email: values.recipient_email || "",
-                        expires_in_days: values.expires_in_days,
-                    },
-                    callback: (r) => {
-                        if (r.message) {
-                            const shareUrl = r.message.share_url;
-
-                            if (values.send_email && values.recipient_email) {
-                                frappe.call({
-                                    method: "doc_designer_ak.api.send_document_email",
-                                    args: { share_name: r.message.name },
-                                    callback: () => {
-                                        showShareResult(shareUrl, true);
-                                    },
-                                });
-                            } else {
-                                showShareResult(shareUrl, false);
-                            }
-                        }
-                    },
-                });
-            },
-        });
-
-        d.show();
+    }).catch(() => {
+        _dd_template_cache[dt] = [];
     });
 }
 
-function showShareResult(url, emailSent) {
+function _dd_add_button(frm, templates) {
+    const label = __("Share via Doc Designer");
+    if (frm.custom_buttons && frm.custom_buttons[label]) return;
+
+    frm.add_custom_button(
+        label,
+        () => _dd_show_share_dialog(frm, templates),
+        __("Create")
+    );
+}
+
+function _dd_show_share_dialog(frm, templates) {
+    const options = templates.map((t) => t.template_name);
+
+    const d = new frappe.ui.Dialog({
+        title: __("Share Document"),
+        fields: [
+            {
+                fieldname: "template_display",
+                fieldtype: "Select",
+                label: __("Template"),
+                options: options.join("\n"),
+                default: options[0],
+                reqd: 1,
+            },
+            {
+                fieldname: "recipient_email",
+                fieldtype: "Data",
+                label: __("Recipient Email"),
+                options: "Email",
+            },
+            {
+                fieldname: "expires_in_days",
+                fieldtype: "Int",
+                label: __("Expires In (Days)"),
+                default: templates[0].expires_in_days || 7,
+                reqd: 1,
+            },
+            {
+                fieldname: "send_email",
+                fieldtype: "Check",
+                label: __("Send Email Now"),
+                default: 0,
+            },
+        ],
+        primary_action_label: __("Create Share Link"),
+        primary_action: (values) => {
+            // Map display name back to record name
+            const selected = templates.find(
+                (t) => t.template_name === values.template_display
+            );
+            if (!selected) return;
+
+            d.hide();
+            frappe.call({
+                method: "doc_designer_ak.api.create_share",
+                args: {
+                    template: selected.name,
+                    reference_doctype: frm.doc.doctype,
+                    reference_name: frm.doc.name,
+                    recipient_email: values.recipient_email || "",
+                    expires_in_days: values.expires_in_days,
+                },
+                callback: (r) => {
+                    if (!r.message) return;
+                    const shareUrl = r.message.share_url;
+
+                    if (values.send_email && values.recipient_email) {
+                        frappe.call({
+                            method: "doc_designer_ak.api.send_document_email",
+                            args: { share_name: r.message.name },
+                            callback: () => _dd_show_result(shareUrl, true),
+                        });
+                    } else {
+                        _dd_show_result(shareUrl, false);
+                    }
+                },
+            });
+        },
+    });
+
+    // Update expiry when template changes
+    d.fields_dict.template_display.$input.on("change", () => {
+        const sel = templates.find(
+            (t) => t.template_name === d.get_value("template_display")
+        );
+        if (sel) d.set_value("expires_in_days", sel.expires_in_days || 7);
+    });
+
+    d.show();
+}
+
+function _dd_show_result(url, emailSent) {
     const msg = emailSent
         ? __("Share link created and email sent!")
         : __("Share link created!");
@@ -140,7 +155,10 @@ function showShareResult(url, emailSent) {
         primary_action_label: __("Copy Link"),
         primary_action: () => {
             navigator.clipboard.writeText(url).then(() => {
-                frappe.show_alert({ message: __("Link copied!"), indicator: "green" });
+                frappe.show_alert({
+                    message: __("Link copied!"),
+                    indicator: "green",
+                });
                 d.hide();
             });
         },
@@ -148,7 +166,6 @@ function showShareResult(url, emailSent) {
 
     d.show();
 
-    // Also add a "Preview" button
     d.$wrapper.find(".modal-footer").prepend(
         `<button class="btn btn-default btn-sm" onclick="window.open('${url}', '_blank')">${__("Preview")}</button>`
     );

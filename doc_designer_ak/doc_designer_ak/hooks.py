@@ -35,6 +35,14 @@ doc_events = {
     }
 }
 
+# Sample data fixtures (loaded on bench migrate)
+fixtures = [
+    {
+        "dt": "AK Document Template",
+        "filters": [["template_name", "=", "Sales Order Approval"]]
+    }
+]
+
 # Scheduled Tasks
 scheduler_events = {
     "hourly": [

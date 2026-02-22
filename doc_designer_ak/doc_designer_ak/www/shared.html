@@ -31,19 +31,19 @@
         <input type="hidden" name="secret_key" value="{{ secret_key }}" />
 
         {% if cover_html %}
-        <div class="ak-cover-page">{{ cover_html }}</div>
+        <div class="ak-cover-page">{{ cover_html | safe }}</div>
         {% endif %}
 
         {% if header_html %}
-        <div class="ak-page-header">{{ header_html }}</div>
+        <div class="ak-page-header">{{ header_html | safe }}</div>
         {% endif %}
 
         <div class="ak-document-body">
-            {{ rendered_html }}
+            {{ rendered_html | safe }}
         </div>
 
         {% if footer_html %}
-        <div class="ak-page-footer">{{ footer_html }}</div>
+        <div class="ak-page-footer">{{ footer_html | safe }}</div>
         {% endif %}
 
         {% if is_locked %}
@@ -71,5 +71,5 @@
 {% endif %}
 
 <style>
-{{ custom_css or "" }}
+{{ (custom_css or "") | safe }}
 </style>
