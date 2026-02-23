@@ -222,6 +222,35 @@ def send_document_email(share_name):
     return {"success": True}
 
 
+@frappe.whitelist(allow_guest=True)
+def download_pdf(secret_key):
+    """Download the shared document as a PDF. Guest-accessible via secret key."""
+    share = frappe.db.get_value(
+        "AK Document Share",
+        {"secret_key": secret_key},
+        ["name", "template", "reference_doctype", "reference_name",
+         "is_active", "expires_at"],
+        as_dict=True,
+    )
+    if not share:
+        frappe.throw(_("Document not found"), frappe.DoesNotExistError)
+
+    from frappe.utils import now_datetime, get_datetime
+    if not share.is_active:
+        frappe.throw(_("This document link is no longer active"))
+    if share.expires_at and get_datetime(share.expires_at) < now_datetime():
+        frappe.throw(_("This document link has expired"))
+
+    share_doc = frappe.get_doc("AK Document Share", share.name)
+    from frappe_ak.renderer import render_template_as_pdf
+    pdf_bytes = render_template_as_pdf(share_doc)
+
+    file_name = f"{share.reference_name or 'document'}.pdf"
+    frappe.local.response.filename = file_name
+    frappe.local.response.filecontent = pdf_bytes
+    frappe.local.response.type = "download"
+
+
 @frappe.whitelist()
 def get_preview_html(share_name):
     """Return rendered HTML for preview ('as recipient sees it')."""

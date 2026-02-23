@@ -92,6 +92,10 @@ def get_context(context):
     context.is_locked = share.is_locked
     context.title = template.template_name
 
+    # Format expiry for footer
+    from frappe.utils import formatdate
+    context.expires_at_formatted = formatdate(share.expires_at) if share.expires_at else ""
+
     # Load settings for branding
     if frappe.db.exists("DocType", "AK Document Settings"):
         settings = frappe.get_single("AK Document Settings")

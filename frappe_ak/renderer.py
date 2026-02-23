@@ -4,11 +4,48 @@ Renders an AK Document Template's HTML with a Frappe document context,
 producing the final HTML that guests see on the shared page.
 """
 
+import os
 import json
 import frappe
 from frappe.utils import cint
 from markupsafe import Markup
 from jinja2.sandbox import SandboxedEnvironment
+
+# Base CSS for PDF rendering (loaded once from document_styles.css)
+_BASE_CSS_CACHE = None
+
+_BODY_CSS = """
+*, *::before, *::after { box-sizing: border-box; }
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #1f2937; line-height: 1.6; margin: 0; padding: 0;
+    -webkit-font-smoothing: antialiased;
+}
+.ak-shared-page { max-width: 900px; margin: 0 auto; padding: 24px 16px; }
+.ak-document-form { background: #fff; border-radius: 12px; overflow: hidden; }
+.ak-field { margin-bottom: 16px; }
+.ak-field-label { display: block; font-size: 13px; font-weight: 600; color: #374151; margin-bottom: 4px; }
+.ak-field-mandatory .ak-field-label::after { content: " *"; color: #ef4444; }
+.ak-field-input {
+    width: 100%; padding: 10px 12px; border: 1px solid #d1d5db; border-radius: 6px;
+    font-size: 14px; color: #1f2937; background: #fff; font-family: inherit;
+}
+.ak-field-readonly .ak-field-input { background: #f9fafb; color: #6b7280; }
+.ak-field-input:disabled { background: #f9fafb; color: #6b7280; }
+"""
+
+
+def _get_base_css():
+    """Load document_styles.css for embedding in PDF HTML."""
+    global _BASE_CSS_CACHE
+    if _BASE_CSS_CACHE is None:
+        css_path = os.path.join(os.path.dirname(__file__), "public", "css", "document_styles.css")
+        try:
+            with open(css_path) as f:
+                _BASE_CSS_CACHE = f.read()
+        except FileNotFoundError:
+            _BASE_CSS_CACHE = ""
+    return _BASE_CSS_CACHE
 
 
 def render_template(share_doc, for_preview=False):
@@ -197,7 +234,7 @@ def render_response(response_doc):
     }
     badge_style, badge_text = badge_colors.get(response_type, badge_colors["Submitted"])
 
-    def _response_badge(**kwargs):
+    def _response_badge(*args, **kwargs):
         return Markup(
             f'<div style="text-align:center;padding:20px 16px;">'
             f'<span style="display:inline-block;padding:8px 24px;border-radius:8px;'
@@ -262,14 +299,17 @@ def render_response_as_pdf(response_doc):
     result = render_response(response_doc)
     template = frappe.get_doc("AK Document Template", response_doc.template)
 
+    css = (
+        _BODY_CSS + "\n"
+        + _get_base_css() + "\n"
+        + (result["css"] or "") + "\n"
+        + ".ak-action-bar { display:none !important; }\n"
+    )
     full_html = f"""<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
-<style>
-{result["css"]}
-.ak-action-bar {{ display:none !important; }}
-</style>
+<style>{css}</style>
 </head>
 <body>{result["html"]}</body>
 </html>"""
@@ -308,7 +348,7 @@ def render_template_as_pdf(share_doc):
 
 
 def _build_full_html(rendered):
-    """Build a complete HTML document from rendered parts."""
+    """Build a complete HTML document from rendered parts, with full CSS for PDF."""
     parts = []
 
     if rendered.cover_html:
@@ -325,11 +365,20 @@ def _build_full_html(rendered):
 
     body = "\n".join(parts)
 
+    # Include all CSS: body defaults + document_styles.css + template custom CSS
+    # Hide the action bar and download button in PDF output
+    css = (
+        _BODY_CSS + "\n"
+        + _get_base_css() + "\n"
+        + (rendered.custom_css or "") + "\n"
+        + ".ak-action-bar { display:none !important; }\n"
+    )
+
     return f"""<!DOCTYPE html>
 <html>
 <head>
 <meta charset="utf-8">
-<style>{rendered.custom_css}</style>
+<style>{css}</style>
 </head>
 <body>{body}</body>
 </html>"""

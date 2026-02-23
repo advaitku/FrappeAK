@@ -15,6 +15,14 @@
         document.body.appendChild(actionBar);
     }
 
+    // Print / Save as PDF button
+    const pdfBtn = document.getElementById("ak-download-pdf");
+    if (pdfBtn) {
+        pdfBtn.addEventListener("click", function () {
+            window.print();
+        });
+    }
+
     if (config.isLocked) {
         disableAllFields();
         return;
@@ -106,10 +114,7 @@
             .then((res) => res.json())
             .then((data) => {
                 if (data.message && data.message.success) {
-                    // Hide the action bar on success
-                    const bar = document.querySelector(".ak-action-bar");
-                    if (bar) bar.style.display = "none";
-                    showSuccessPage(data.message.message);
+                    showSuccessPage(data.message.message, responseType);
                 } else if (data.exc) {
                     const errMsg = data._server_messages
                         ? JSON.parse(JSON.parse(data._server_messages)[0]).message
@@ -130,14 +135,56 @@
             });
     }
 
-    function showSuccessPage(message) {
-        const form = document.getElementById("ak-document-form");
+    function showSuccessPage(message, responseType) {
+        // Hide the action bar
+        const bar = document.querySelector(".ak-action-bar");
+        if (bar) bar.style.display = "none";
+
+        // Determine icon and color based on response type
+        var icon, accentColor, bgColor, borderColor, typeLabel;
+        if (responseType === "Accepted") {
+            icon = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+            accentColor = "#16a34a";
+            bgColor = "#f0fdf4";
+            borderColor = "#bbf7d0";
+            typeLabel = "Accepted";
+        } else if (responseType === "Declined") {
+            icon = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+            accentColor = "#dc2626";
+            bgColor = "#fef2f2";
+            borderColor = "#fecaca";
+            typeLabel = "Declined";
+        } else {
+            icon = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>';
+            accentColor = "#2563eb";
+            bgColor = "#eff6ff";
+            borderColor = "#bfdbfe";
+            typeLabel = "Submitted";
+        }
+
+        var page = document.querySelector(".ak-shared-page");
+        if (!page) page = document.body;
+
+        // Replace entire page content below branding
+        var form = document.getElementById("ak-document-form");
         if (form) {
             form.innerHTML =
-                '<div class="ak-success-message">' +
-                '<div class="ak-success-icon">&#10003;</div>' +
-                "<h2>" + escapeHtml(message) + "</h2>" +
-                "</div>";
+                '<div class="ak-success-page">' +
+                    '<div class="ak-success-card">' +
+                        '<div class="ak-success-icon-wrap" style="background:' + bgColor + ';border-color:' + borderColor + ';color:' + accentColor + ';">' +
+                            icon +
+                        '</div>' +
+                        '<div class="ak-success-badge" style="background:' + bgColor + ';color:' + accentColor + ';border-color:' + borderColor + ';">' +
+                            escapeHtml(typeLabel) +
+                        '</div>' +
+                        '<h2 class="ak-success-title">' + escapeHtml(message) + '</h2>' +
+                        '<p class="ak-success-subtitle">You can safely close this page.</p>' +
+                        '<button type="button" class="ak-success-print-btn" onclick="window.print()">' +
+                            '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>' +
+                            'Print this page' +
+                        '</button>' +
+                    '</div>' +
+                '</div>';
         }
     }
 

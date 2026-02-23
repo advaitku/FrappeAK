@@ -357,96 +357,106 @@ def ak_items_table(doc, columns=None, show_total=True, total_field="grand_total"
 
 
 def ak_accept_decline(accept_label="Accept", decline_label="Decline"):
-    """Render Accept and Decline buttons in a sticky bottom action bar.
-
-    Args:
-        accept_label: Text for the accept button
-        decline_label: Text for the decline button
-    """
-    bar_style = (
+    """Render Accept and Decline buttons in a sticky bottom action bar."""
+    bar = (
         "position:fixed;bottom:0;left:0;right:0;z-index:100;"
-        "background:rgba(255,255,255,0.96);backdrop-filter:blur(20px) saturate(180%);"
-        "-webkit-backdrop-filter:blur(20px) saturate(180%);"
-        "border-top:1px solid rgba(0,0,0,0.06);"
-        "box-shadow:0 -4px 24px rgba(0,0,0,0.08);"
-        "padding:16px 24px;"
+        "background:#fff;border-top:1px solid #e5e7eb;padding:14px 24px;"
     )
-    inner_style = (
+    inner = (
         "max-width:900px;margin:0 auto;"
-        "display:flex;gap:12px;justify-content:center;align-items:center;"
+        "display:flex;justify-content:space-between;align-items:center;"
     )
-    accept_style = (
+    right = "display:flex;gap:10px;align-items:center;"
+    pdf = (
+        "display:inline-flex;align-items:center;gap:6px;"
+        "padding:8px 16px;"
+        "background:#fff;color:#52525b;border:1px solid #e5e7eb;border-radius:8px;"
+        "font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;line-height:1.5;"
+        "transition:background 0.15s,border-color 0.15s;"
+    )
+    accept = (
         "display:inline-flex;align-items:center;justify-content:center;"
-        "padding:12px 40px;min-width:180px;"
-        "background:linear-gradient(180deg,#4f56e8 0%,#4338ca 100%);"
-        "color:#fff;border:none;border-radius:10px;"
-        "font-size:15px;font-weight:600;cursor:pointer;"
-        "font-family:inherit;line-height:1.5;letter-spacing:-0.01em;"
-        "box-shadow:0 1px 3px rgba(67,56,202,0.4),0 0 0 1px rgba(67,56,202,0.15),"
-        "inset 0 1px 0 rgba(255,255,255,0.12);"
-        "transition:all 0.2s cubic-bezier(0.4,0,0.2,1);"
+        "padding:10px 36px;min-width:160px;"
+        "background:#18181b;color:#fff;border:1px solid #18181b;border-radius:8px;"
+        "font-size:14px;font-weight:500;cursor:pointer;"
+        "font-family:inherit;line-height:1.5;"
+        "transition:background 0.15s,transform 0.15s;"
     )
-    decline_style = (
+    decline = (
         "display:inline-flex;align-items:center;justify-content:center;"
-        "padding:12px 40px;min-width:180px;"
-        "background:#fff;color:#374151;"
-        "border:1px solid #d1d5db;border-radius:10px;"
-        "font-size:15px;font-weight:600;cursor:pointer;"
-        "font-family:inherit;line-height:1.5;letter-spacing:-0.01em;"
-        "box-shadow:0 1px 2px rgba(0,0,0,0.05);"
-        "transition:all 0.2s cubic-bezier(0.4,0,0.2,1);"
+        "padding:10px 36px;min-width:160px;"
+        "background:#fff;color:#18181b;border:1px solid #e5e7eb;border-radius:8px;"
+        "font-size:14px;font-weight:500;cursor:pointer;"
+        "font-family:inherit;line-height:1.5;"
+        "transition:background 0.15s,border-color 0.15s;"
     )
+    dl_svg = ('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+              'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+              '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>'
+              '<polyline points="7 10 12 15 17 10"/>'
+              '<line x1="12" y1="15" x2="12" y2="3"/></svg>')
     return Markup(
-        f'<div class="ak-action-bar" style="{bar_style}">'
-        f'<div class="ak-action-bar-inner" style="{inner_style}">'
-        f'<button type="button" class="ak-decline-btn" data-action="Declined" style="{decline_style}"'
-        f' onmouseover="this.style.background=\'#fef2f2\';this.style.color=\'#dc2626\';this.style.borderColor=\'#fca5a5\';this.style.transform=\'translateY(-1px)\';this.style.boxShadow=\'0 4px 12px rgba(239,68,68,0.15)\'"'
-        f' onmouseout="this.style.background=\'#fff\';this.style.color=\'#374151\';this.style.borderColor=\'#d1d5db\';this.style.transform=\'none\';this.style.boxShadow=\'0 1px 2px rgba(0,0,0,0.05)\'"'
+        f'<div class="ak-action-bar" style="{bar}">'
+        f'<div class="ak-action-bar-inner" style="{inner}">'
+        f'<button type="button" id="ak-download-pdf" style="{pdf}"'
+        f' onmouseover="this.style.background=\'#f9fafb\';this.style.borderColor=\'#d1d5db\'"'
+        f' onmouseout="this.style.background=\'#fff\';this.style.borderColor=\'#e5e7eb\'"'
+        f'>{dl_svg} Print / Save PDF</button>'
+        f'<div style="{right}">'
+        f'<button type="button" class="ak-decline-btn" data-action="Declined" style="{decline}"'
+        f' onmouseover="this.style.background=\'#f9fafb\';this.style.borderColor=\'#d1d5db\'"'
+        f' onmouseout="this.style.background=\'#fff\';this.style.borderColor=\'#e5e7eb\'"'
         f'>{frappe.utils.escape_html(decline_label)}</button>'
-        f'<button type="button" class="ak-accept-btn" data-action="Accepted" style="{accept_style}"'
-        f' onmouseover="this.style.background=\'linear-gradient(180deg,#5a5ff0 0%,#4f46e5 100%)\';this.style.transform=\'translateY(-1px)\';this.style.boxShadow=\'0 4px 12px rgba(67,56,202,0.35),0 0 0 1px rgba(67,56,202,0.2),inset 0 1px 0 rgba(255,255,255,0.15)\'"'
-        f' onmouseout="this.style.background=\'linear-gradient(180deg,#4f56e8 0%,#4338ca 100%)\';this.style.transform=\'none\';this.style.boxShadow=\'0 1px 3px rgba(67,56,202,0.4),0 0 0 1px rgba(67,56,202,0.15),inset 0 1px 0 rgba(255,255,255,0.12)\'"'
+        f'<button type="button" class="ak-accept-btn" data-action="Accepted" style="{accept}"'
+        f' onmouseover="this.style.background=\'#27272a\'"'
+        f' onmouseout="this.style.background=\'#18181b\'"'
         f'>{frappe.utils.escape_html(accept_label)}</button>'
+        f'</div>'
         f'</div>'
         f'</div>'
     )
 
 
 def ak_submit_button(label="Submit"):
-    """Render a submit button in a sticky bottom action bar.
-
-    Args:
-        label: Button text
-    """
-    bar_style = (
+    """Render a submit button in a sticky bottom action bar."""
+    bar = (
         "position:fixed;bottom:0;left:0;right:0;z-index:100;"
-        "background:rgba(255,255,255,0.96);backdrop-filter:blur(20px) saturate(180%);"
-        "-webkit-backdrop-filter:blur(20px) saturate(180%);"
-        "border-top:1px solid rgba(0,0,0,0.06);"
-        "box-shadow:0 -4px 24px rgba(0,0,0,0.08);"
-        "padding:16px 24px;"
+        "background:#fff;border-top:1px solid #e5e7eb;padding:14px 24px;"
     )
-    inner_style = (
+    inner = (
         "max-width:900px;margin:0 auto;"
-        "display:flex;gap:12px;justify-content:center;align-items:center;"
+        "display:flex;justify-content:space-between;align-items:center;"
     )
-    btn_style = (
+    pdf = (
+        "display:inline-flex;align-items:center;gap:6px;"
+        "padding:8px 16px;"
+        "background:#fff;color:#52525b;border:1px solid #e5e7eb;border-radius:8px;"
+        "font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;line-height:1.5;"
+        "transition:background 0.15s,border-color 0.15s;"
+    )
+    btn = (
         "display:inline-flex;align-items:center;justify-content:center;"
-        "padding:12px 48px;min-width:200px;"
-        "background:linear-gradient(180deg,#4f56e8 0%,#4338ca 100%);"
-        "color:#fff;border:none;border-radius:10px;"
-        "font-size:15px;font-weight:600;cursor:pointer;"
-        "font-family:inherit;line-height:1.5;letter-spacing:-0.01em;"
-        "box-shadow:0 1px 3px rgba(67,56,202,0.4),0 0 0 1px rgba(67,56,202,0.15),"
-        "inset 0 1px 0 rgba(255,255,255,0.12);"
-        "transition:all 0.2s cubic-bezier(0.4,0,0.2,1);"
+        "padding:10px 48px;min-width:180px;"
+        "background:#18181b;color:#fff;border:1px solid #18181b;border-radius:8px;"
+        "font-size:14px;font-weight:500;cursor:pointer;"
+        "font-family:inherit;line-height:1.5;"
+        "transition:background 0.15s;"
     )
+    dl_svg = ('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" '
+              'stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+              '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>'
+              '<polyline points="7 10 12 15 17 10"/>'
+              '<line x1="12" y1="15" x2="12" y2="3"/></svg>')
     return Markup(
-        f'<div class="ak-action-bar" style="{bar_style}">'
-        f'<div class="ak-action-bar-inner" style="{inner_style}">'
-        f'<button type="button" class="ak-submit-btn" data-action="Submitted" style="{btn_style}"'
-        f' onmouseover="this.style.background=\'linear-gradient(180deg,#5a5ff0 0%,#4f46e5 100%)\';this.style.transform=\'translateY(-1px)\';this.style.boxShadow=\'0 4px 12px rgba(67,56,202,0.35),0 0 0 1px rgba(67,56,202,0.2),inset 0 1px 0 rgba(255,255,255,0.15)\'"'
-        f' onmouseout="this.style.background=\'linear-gradient(180deg,#4f56e8 0%,#4338ca 100%)\';this.style.transform=\'none\';this.style.boxShadow=\'0 1px 3px rgba(67,56,202,0.4),0 0 0 1px rgba(67,56,202,0.15),inset 0 1px 0 rgba(255,255,255,0.12)\'"'
+        f'<div class="ak-action-bar" style="{bar}">'
+        f'<div class="ak-action-bar-inner" style="{inner}">'
+        f'<button type="button" id="ak-download-pdf" style="{pdf}"'
+        f' onmouseover="this.style.background=\'#f9fafb\';this.style.borderColor=\'#d1d5db\'"'
+        f' onmouseout="this.style.background=\'#fff\';this.style.borderColor=\'#e5e7eb\'"'
+        f'>{dl_svg} Print / Save PDF</button>'
+        f'<button type="button" class="ak-submit-btn" data-action="Submitted" style="{btn}"'
+        f' onmouseover="this.style.background=\'#27272a\'"'
+        f' onmouseout="this.style.background=\'#18181b\'"'
         f'>{frappe.utils.escape_html(label)}</button>'
         f'</div>'
         f'</div>'
