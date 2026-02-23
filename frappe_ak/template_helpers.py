@@ -363,13 +363,50 @@ def ak_accept_decline(accept_label="Accept", decline_label="Decline"):
         accept_label: Text for the accept button
         decline_label: Text for the decline button
     """
+    bar_style = (
+        "position:fixed;bottom:0;left:0;right:0;z-index:100;"
+        "background:rgba(255,255,255,0.96);backdrop-filter:blur(20px) saturate(180%);"
+        "-webkit-backdrop-filter:blur(20px) saturate(180%);"
+        "border-top:1px solid rgba(0,0,0,0.06);"
+        "box-shadow:0 -4px 24px rgba(0,0,0,0.08);"
+        "padding:16px 24px;"
+    )
+    inner_style = (
+        "max-width:900px;margin:0 auto;"
+        "display:flex;gap:12px;justify-content:center;align-items:center;"
+    )
+    accept_style = (
+        "display:inline-flex;align-items:center;justify-content:center;"
+        "padding:12px 40px;min-width:180px;"
+        "background:linear-gradient(180deg,#4f56e8 0%,#4338ca 100%);"
+        "color:#fff;border:none;border-radius:10px;"
+        "font-size:15px;font-weight:600;cursor:pointer;"
+        "font-family:inherit;line-height:1.5;letter-spacing:-0.01em;"
+        "box-shadow:0 1px 3px rgba(67,56,202,0.4),0 0 0 1px rgba(67,56,202,0.15),"
+        "inset 0 1px 0 rgba(255,255,255,0.12);"
+        "transition:all 0.2s cubic-bezier(0.4,0,0.2,1);"
+    )
+    decline_style = (
+        "display:inline-flex;align-items:center;justify-content:center;"
+        "padding:12px 40px;min-width:180px;"
+        "background:#fff;color:#374151;"
+        "border:1px solid #d1d5db;border-radius:10px;"
+        "font-size:15px;font-weight:600;cursor:pointer;"
+        "font-family:inherit;line-height:1.5;letter-spacing:-0.01em;"
+        "box-shadow:0 1px 2px rgba(0,0,0,0.05);"
+        "transition:all 0.2s cubic-bezier(0.4,0,0.2,1);"
+    )
     return Markup(
-        f'<div class="ak-action-bar">'
-        f'<div class="ak-action-bar-inner">'
-        f'<button type="button" class="ak-decline-btn" data-action="Declined">'
-        f'{frappe.utils.escape_html(decline_label)}</button>'
-        f'<button type="button" class="ak-accept-btn" data-action="Accepted">'
-        f'{frappe.utils.escape_html(accept_label)}</button>'
+        f'<div class="ak-action-bar" style="{bar_style}">'
+        f'<div class="ak-action-bar-inner" style="{inner_style}">'
+        f'<button type="button" class="ak-decline-btn" data-action="Declined" style="{decline_style}"'
+        f' onmouseover="this.style.background=\'#fef2f2\';this.style.color=\'#dc2626\';this.style.borderColor=\'#fca5a5\';this.style.transform=\'translateY(-1px)\';this.style.boxShadow=\'0 4px 12px rgba(239,68,68,0.15)\'"'
+        f' onmouseout="this.style.background=\'#fff\';this.style.color=\'#374151\';this.style.borderColor=\'#d1d5db\';this.style.transform=\'none\';this.style.boxShadow=\'0 1px 2px rgba(0,0,0,0.05)\'"'
+        f'>{frappe.utils.escape_html(decline_label)}</button>'
+        f'<button type="button" class="ak-accept-btn" data-action="Accepted" style="{accept_style}"'
+        f' onmouseover="this.style.background=\'linear-gradient(180deg,#5a5ff0 0%,#4f46e5 100%)\';this.style.transform=\'translateY(-1px)\';this.style.boxShadow=\'0 4px 12px rgba(67,56,202,0.35),0 0 0 1px rgba(67,56,202,0.2),inset 0 1px 0 rgba(255,255,255,0.15)\'"'
+        f' onmouseout="this.style.background=\'linear-gradient(180deg,#4f56e8 0%,#4338ca 100%)\';this.style.transform=\'none\';this.style.boxShadow=\'0 1px 3px rgba(67,56,202,0.4),0 0 0 1px rgba(67,56,202,0.15),inset 0 1px 0 rgba(255,255,255,0.12)\'"'
+        f'>{frappe.utils.escape_html(accept_label)}</button>'
         f'</div>'
         f'</div>'
     )
@@ -381,11 +418,36 @@ def ak_submit_button(label="Submit"):
     Args:
         label: Button text
     """
+    bar_style = (
+        "position:fixed;bottom:0;left:0;right:0;z-index:100;"
+        "background:rgba(255,255,255,0.96);backdrop-filter:blur(20px) saturate(180%);"
+        "-webkit-backdrop-filter:blur(20px) saturate(180%);"
+        "border-top:1px solid rgba(0,0,0,0.06);"
+        "box-shadow:0 -4px 24px rgba(0,0,0,0.08);"
+        "padding:16px 24px;"
+    )
+    inner_style = (
+        "max-width:900px;margin:0 auto;"
+        "display:flex;gap:12px;justify-content:center;align-items:center;"
+    )
+    btn_style = (
+        "display:inline-flex;align-items:center;justify-content:center;"
+        "padding:12px 48px;min-width:200px;"
+        "background:linear-gradient(180deg,#4f56e8 0%,#4338ca 100%);"
+        "color:#fff;border:none;border-radius:10px;"
+        "font-size:15px;font-weight:600;cursor:pointer;"
+        "font-family:inherit;line-height:1.5;letter-spacing:-0.01em;"
+        "box-shadow:0 1px 3px rgba(67,56,202,0.4),0 0 0 1px rgba(67,56,202,0.15),"
+        "inset 0 1px 0 rgba(255,255,255,0.12);"
+        "transition:all 0.2s cubic-bezier(0.4,0,0.2,1);"
+    )
     return Markup(
-        f'<div class="ak-action-bar">'
-        f'<div class="ak-action-bar-inner">'
-        f'<button type="button" class="ak-submit-btn" data-action="Submitted">'
-        f'{frappe.utils.escape_html(label)}</button>'
+        f'<div class="ak-action-bar" style="{bar_style}">'
+        f'<div class="ak-action-bar-inner" style="{inner_style}">'
+        f'<button type="button" class="ak-submit-btn" data-action="Submitted" style="{btn_style}"'
+        f' onmouseover="this.style.background=\'linear-gradient(180deg,#5a5ff0 0%,#4f46e5 100%)\';this.style.transform=\'translateY(-1px)\';this.style.boxShadow=\'0 4px 12px rgba(67,56,202,0.35),0 0 0 1px rgba(67,56,202,0.2),inset 0 1px 0 rgba(255,255,255,0.15)\'"'
+        f' onmouseout="this.style.background=\'linear-gradient(180deg,#4f56e8 0%,#4338ca 100%)\';this.style.transform=\'none\';this.style.boxShadow=\'0 1px 3px rgba(67,56,202,0.4),0 0 0 1px rgba(67,56,202,0.15),inset 0 1px 0 rgba(255,255,255,0.12)\'"'
+        f'>{frappe.utils.escape_html(label)}</button>'
         f'</div>'
         f'</div>'
     )

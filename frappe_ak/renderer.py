@@ -4,8 +4,10 @@ Renders an AK Document Template's HTML with a Frappe document context,
 producing the final HTML that guests see on the shared page.
 """
 
+import json
 import frappe
 from frappe.utils import cint
+from markupsafe import Markup
 from jinja2.sandbox import SandboxedEnvironment
 
 
@@ -96,6 +98,190 @@ def render_template(share_doc, for_preview=False):
     }
 
     return rendered
+
+
+def render_response(response_doc):
+    """Re-render a template with submitted response values, all fields read-only.
+
+    Args:
+        response_doc: AK Document Response document (frappe.get_doc result)
+
+    Returns:
+        dict with keys: html, css
+    """
+    template = frappe.get_doc("AK Document Template", response_doc.template)
+
+    # Load the original document or empty dict
+    if template.is_public_form or not response_doc.reference_name:
+        doc = frappe._dict()
+    else:
+        doc = frappe.get_doc(response_doc.reference_doctype, response_doc.reference_name)
+
+    # Parse submitted field values
+    response_data = {}
+    if response_doc.response_data:
+        response_data = json.loads(response_doc.response_data)
+
+    # Build template field dicts with submitted values baked in, all forced read-only
+    template_fields = []
+    for f in template.fields:
+        submitted_val = response_data.get(f.field_name)
+        # Use submitted value if available, else fall back to doc value or default
+        if submitted_val is not None:
+            default_value = submitted_val
+        elif not template.is_public_form and doc and f.is_existing_field:
+            doc_val = doc.get(f.field_name) if hasattr(doc, "get") else None
+            default_value = doc_val if doc_val is not None else (f.default_value or "")
+        else:
+            default_value = f.default_value or ""
+
+        template_fields.append({
+            "field_name": f.field_name,
+            "field_label": f.field_label,
+            "field_type": f.field_type,
+            "options": f.options,
+            "is_existing_field": cint(f.is_existing_field),
+            "is_editable": 0,  # Force all read-only
+            "is_mandatory": 0,
+            "default_value": default_value,
+            "column": f.column,
+        })
+
+    from frappe_ak.template_helpers import (
+        ak_input, ak_textarea, ak_date, ak_datetime,
+        ak_checkbox, ak_select, ak_field_table,
+        ak_items_table,
+    )
+
+    # Wrap each helper to force editable=False and inject response values
+    def _readonly_input(fieldname, label="", value="", placeholder="",
+                        editable=True, mandatory=False, input_type="text"):
+        val = response_data.get(fieldname, value)
+        return ak_input(fieldname, label=label, value=val,
+                        editable=False, mandatory=False, input_type=input_type)
+
+    def _readonly_textarea(fieldname, label="", value="", rows=4,
+                           editable=True, mandatory=False, placeholder=""):
+        val = response_data.get(fieldname, value)
+        return ak_textarea(fieldname, label=label, value=val, rows=rows,
+                           editable=False, mandatory=False)
+
+    def _readonly_date(fieldname, label="", value="", editable=True, mandatory=False):
+        val = response_data.get(fieldname, value)
+        return ak_date(fieldname, label=label, value=val,
+                       editable=False, mandatory=False)
+
+    def _readonly_datetime(fieldname, label="", value="", editable=True, mandatory=False):
+        val = response_data.get(fieldname, value)
+        return ak_datetime(fieldname, label=label, value=val,
+                           editable=False, mandatory=False)
+
+    def _readonly_checkbox(fieldname, label="", checked=False, editable=True):
+        val = response_data.get(fieldname)
+        if val is not None:
+            checked = bool(int(val)) if str(val).isdigit() else bool(val)
+        return ak_checkbox(fieldname, label=label, checked=checked, editable=False)
+
+    def _readonly_select(fieldname, label="", options=None, value="",
+                         editable=True, mandatory=False):
+        val = response_data.get(fieldname, value)
+        return ak_select(fieldname, label=label, options=options, value=val,
+                         editable=False, mandatory=False)
+
+    # Response badge instead of action buttons
+    response_type = response_doc.response_type or "Submitted"
+    badge_colors = {
+        "Accepted": ("background:#f0fdf4;border-color:#86efac;color:#16a34a;", "Accepted"),
+        "Declined": ("background:#fef2f2;border-color:#fca5a5;color:#dc2626;", "Declined"),
+        "Submitted": ("background:#eff6ff;border-color:#93c5fd;color:#2563eb;", "Submitted"),
+    }
+    badge_style, badge_text = badge_colors.get(response_type, badge_colors["Submitted"])
+
+    def _response_badge(**kwargs):
+        return Markup(
+            f'<div style="text-align:center;padding:20px 16px;">'
+            f'<span style="display:inline-block;padding:8px 24px;border-radius:8px;'
+            f'font-size:14px;font-weight:600;border:1px solid;{badge_style}">'
+            f'Response: {frappe.utils.escape_html(badge_text)}</span>'
+            f'</div>'
+        )
+
+    context = {
+        "doc": doc,
+        "frappe": frappe._dict({
+            "utils": frappe.utils,
+            "format": frappe.format,
+            "get_url": frappe.utils.get_url,
+        }),
+        "ak_input": _readonly_input,
+        "ak_textarea": _readonly_textarea,
+        "ak_date": _readonly_date,
+        "ak_datetime": _readonly_datetime,
+        "ak_checkbox": _readonly_checkbox,
+        "ak_select": _readonly_select,
+        "ak_field_table": lambda columns=1: ak_field_table(template_fields, columns=columns, doc=doc),
+        "ak_items_table": lambda columns=None, show_total=True: ak_items_table(doc, columns=columns, show_total=show_total),
+        "ak_accept_decline": _response_badge,
+        "ak_submit_button": _response_badge,
+        "nowdate": frappe.utils.nowdate,
+        "format_currency": frappe.utils.fmt_money,
+        "share": frappe._dict({"name": response_doc.document_share, "secret_key": ""}),
+        "template_fields": template_fields,
+    }
+
+    html = _render_jinja(template.template_html or "", context)
+    cover_html = _render_jinja(template.cover_page_html or "", context)
+    header_html = _render_jinja(template.header_html or "", context)
+    footer_html = _render_jinja(template.footer_html or "", context)
+
+    # Combine all sections
+    parts = []
+    if cover_html:
+        parts.append(f'<div class="ak-cover-page">{cover_html}</div>')
+    if header_html:
+        parts.append(f'<div class="ak-header">{header_html}</div>')
+    parts.append(html)
+    if footer_html:
+        parts.append(f'<div class="ak-footer">{footer_html}</div>')
+
+    return {
+        "html": "\n".join(parts),
+        "css": template.custom_css or "",
+    }
+
+
+def render_response_as_pdf(response_doc):
+    """Render a submitted response as a PDF.
+
+    Args:
+        response_doc: AK Document Response document
+
+    Returns:
+        PDF bytes
+    """
+    result = render_response(response_doc)
+    template = frappe.get_doc("AK Document Template", response_doc.template)
+
+    full_html = f"""<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+{result["css"]}
+.ak-action-bar {{ display:none !important; }}
+</style>
+</head>
+<body>{result["html"]}</body>
+</html>"""
+
+    from frappe.utils.pdf import get_pdf
+    return get_pdf(full_html, options={
+        "page-size": template.page_format or "A4",
+        "margin-top": f"{template.top_margin or 15}mm",
+        "margin-bottom": f"{template.bottom_margin or 15}mm",
+        "margin-left": f"{template.left_margin or 15}mm",
+        "margin-right": f"{template.right_margin or 15}mm",
+    })
 
 
 def render_template_as_pdf(share_doc):

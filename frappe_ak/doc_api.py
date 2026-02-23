@@ -101,11 +101,51 @@ def submit_response(secret_key, response_type, field_values):
     frappe.db.set_value("AK Document Share", share.name, update_fields)
     share_doc = frappe.get_doc("AK Document Share", share.name)
 
+    # Execute response actions — update fields on the original document based on response type
+    actions_applied = {}
+    if share.reference_name and not template.is_public_form and template.response_actions:
+        action_doc = frappe.get_doc(share.reference_doctype, share.reference_name)
+        for action in template.response_actions:
+            if action.response_type == response_type:
+                old_val = action_doc.get(action.field_name)
+                action_doc.set(action.field_name, action.value)
+                actions_applied[action.field_name] = {
+                    "old": str(old_val) if old_val is not None else "",
+                    "new": action.value,
+                }
+        if actions_applied:
+            action_doc.flags.ignore_permissions = True
+            action_doc.save()
+
+    # Auto-attach filled document as PDF to the original record
+    if template.attach_pdf_on_submission and share.reference_name and not template.is_public_form:
+        try:
+            from frappe_ak.renderer import render_response_as_pdf
+            pdf_bytes = render_response_as_pdf(response)
+            file_name = f"{share.reference_name}-{response_type}-{response.name}.pdf"
+            _file = frappe.get_doc({
+                "doctype": "File",
+                "file_name": file_name,
+                "attached_to_doctype": share.reference_doctype,
+                "attached_to_name": share.reference_name,
+                "is_private": 1,
+                "content": pdf_bytes,
+            })
+            _file.save(ignore_permissions=True)
+        except Exception:
+            frappe.log_error(
+                f"PDF attachment failed for response {response.name}",
+                "Doc Designer AK PDF Error",
+            )
+
     # Audit trail: add comment on the original document
-    if fields_updated and share.reference_name and not template.is_public_form:
+    has_changes = fields_updated or actions_applied
+    if has_changes and share.reference_name and not template.is_public_form:
         changes_list = []
         for fname, vals in fields_updated.items():
             changes_list.append(f"<li><strong>{fname}</strong>: {vals['old']} → {vals['new']}</li>")
+        for fname, vals in actions_applied.items():
+            changes_list.append(f"<li><strong>{fname}</strong>: {vals['old']} → {vals['new']} <em>(response action)</em></li>")
         comment_html = (
             f"<p>Fields updated via Document Designer ({share.name}):</p>"
             f"<ul>{''.join(changes_list)}</ul>"
@@ -189,6 +229,31 @@ def get_preview_html(share_name):
     share = frappe.get_doc("AK Document Share", share_name)
     html = render_template(share, for_preview=True)
     return {"html": html}
+
+
+@frappe.whitelist()
+def render_response(response_name):
+    """Render a submitted response as a filled-in document.
+
+    Returns the template re-rendered with all submitted values shown read-only.
+
+    Args:
+        response_name: Name of the AK Document Response record
+    """
+    response_doc = frappe.get_doc("AK Document Response", response_name)
+    response_doc.check_permission("read")
+
+    from frappe_ak.renderer import render_response as _render_response
+    result = _render_response(response_doc)
+
+    return {
+        "html": result["html"],
+        "css": result["css"],
+        "response_type": response_doc.response_type,
+        "submitted_at": str(response_doc.submitted_at) if response_doc.submitted_at else "",
+        "reference_name": response_doc.reference_name or "",
+        "template": response_doc.template,
+    }
 
 
 @frappe.whitelist()

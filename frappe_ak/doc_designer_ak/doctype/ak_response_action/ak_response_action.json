@@ -1,0 +1,61 @@
+{
+ "actions": [],
+ "creation": "2026-02-23 00:00:00",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "response_type",
+  "field_name",
+  "value",
+  "column_break_1",
+  "description"
+ ],
+ "fields": [
+  {
+   "fieldname": "response_type",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "When Response Is",
+   "options": "Accepted\nDeclined\nSubmitted",
+   "reqd": 1
+  },
+  {
+   "description": "Field name on the reference DocType to update",
+   "fieldname": "field_name",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Set Field",
+   "reqd": 1
+  },
+  {
+   "description": "Value to set the field to",
+   "fieldname": "value",
+   "fieldtype": "Data",
+   "in_list_view": 1,
+   "label": "To Value",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "description",
+   "fieldtype": "Small Text",
+   "label": "Description"
+  }
+ ],
+ "index_web_pages_for_search": 0,
+ "istable": 1,
+ "links": [],
+ "modified": "2026-02-23 00:00:00",
+ "modified_by": "Administrator",
+ "module": "Doc Designer AK",
+ "name": "AK Response Action",
+ "owner": "Administrator",
+ "permissions": [],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": []
+}

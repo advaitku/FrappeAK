@@ -44,22 +44,34 @@
         /* Sticky Action Bar */
         .ak-action-bar {
             position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
-            background: rgba(255,255,255,0.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-            border-top: 1px solid #e5e7eb; box-shadow: 0 -4px 16px rgba(0,0,0,0.06); padding: 16px 20px;
+            background: rgba(255,255,255,0.95); backdrop-filter: blur(16px) saturate(180%); -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border-top: 1px solid rgba(0,0,0,0.06); box-shadow: 0 -1px 0 rgba(0,0,0,0.04), 0 -8px 24px rgba(0,0,0,0.06); padding: 16px 24px;
         }
         .ak-action-bar-inner { max-width: 900px; margin: 0 auto; display: flex; gap: 12px; justify-content: flex-end; align-items: center; }
         .ak-accept-btn, .ak-submit-btn {
-            padding: 12px 36px; background: #4f46e5; color: #fff; border: none; border-radius: 8px;
-            font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.15s;
-            font-family: inherit; line-height: 1.4;
+            position: relative; padding: 11px 32px; background: linear-gradient(180deg, #4f56e8 0%, #4338ca 100%); color: #fff;
+            border: none; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4,0,0.2,1); font-family: inherit; line-height: 1.5; letter-spacing: -0.01em;
+            box-shadow: 0 1px 2px rgba(67,56,202,0.3), 0 0 0 1px rgba(67,56,202,0.15), inset 0 1px 0 rgba(255,255,255,0.12);
         }
-        .ak-accept-btn:hover, .ak-submit-btn:hover { background: #4338ca; }
+        .ak-accept-btn:hover, .ak-submit-btn:hover {
+            background: linear-gradient(180deg, #5a5ff0 0%, #4f46e5 100%);
+            box-shadow: 0 2px 8px rgba(67,56,202,0.35), 0 0 0 1px rgba(67,56,202,0.2), inset 0 1px 0 rgba(255,255,255,0.15);
+            transform: translateY(-1px);
+        }
+        .ak-accept-btn:active, .ak-submit-btn:active {
+            background: linear-gradient(180deg, #4338ca 0%, #3730a3 100%);
+            box-shadow: 0 1px 2px rgba(67,56,202,0.2), inset 0 1px 3px rgba(0,0,0,0.1); transform: translateY(0);
+        }
         .ak-decline-btn {
-            padding: 12px 36px; background: transparent; color: #6b7280; border: 1px solid #d1d5db; border-radius: 8px;
-            font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.15s;
-            font-family: inherit; line-height: 1.4;
+            position: relative; padding: 11px 32px; background: #fff; color: #374151; border: 1px solid #d1d5db;
+            border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4,0,0.2,1); font-family: inherit; line-height: 1.5; letter-spacing: -0.01em;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
         }
-        .ak-decline-btn:hover { background: #fef2f2; color: #dc2626; border-color: #fca5a5; }
+        .ak-decline-btn:hover { background: #fef2f2; color: #dc2626; border-color: #fca5a5; box-shadow: 0 2px 8px rgba(239,68,68,0.1); transform: translateY(-1px); }
+        .ak-decline-btn:active { background: #fee2e2; color: #b91c1c; border-color: #f87171; box-shadow: inset 0 1px 3px rgba(0,0,0,0.06); transform: translateY(0); }
+        .ak-accept-btn:disabled, .ak-decline-btn:disabled, .ak-submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
 
         /* Toast */
         .ak-toast { position: fixed; bottom: 96px; right: 24px; padding: 12px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; z-index: 10000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: ak-toast-in 0.3s ease; }

@@ -35,6 +35,7 @@
   "show_accept_decline",
   "lock_after_submission",
   "disable_access_after_submission",
+  "attach_pdf_on_submission",
   "success_message",
   "email_settings_section",
   "email_subject",
@@ -45,6 +46,8 @@
   "notify_on_response",
   "column_break_notify",
   "reminder_days",
+  "response_actions_section",
+  "response_actions",
   "automation_section",
   "auto_send_on",
   "auto_send_to_field",
@@ -234,6 +237,13 @@
    "label": "Disable Access After Submission"
   },
   {
+   "default": "0",
+   "description": "Automatically attach the filled document as a PDF to the original record when a response is submitted",
+   "fieldname": "attach_pdf_on_submission",
+   "fieldtype": "Check",
+   "label": "Attach PDF on Submission"
+  },
+  {
    "fieldname": "success_message",
    "fieldtype": "Small Text",
    "label": "Success Message"
@@ -293,6 +303,20 @@
    "fieldtype": "Int",
    "label": "Send Reminder After (Days)",
    "description": "Automatically resend email if no response after this many days. Set 0 to disable."
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "response_actions_section",
+   "fieldtype": "Section Break",
+   "label": "Response Actions",
+   "description": "Automatically update fields on the original document when a response is received"
+  },
+  {
+   "fieldname": "response_actions",
+   "fieldtype": "Table",
+   "label": "Response Actions",
+   "options": "AK Response Action",
+   "description": "Add rows to set field values when a document is Accepted, Declined, or Submitted"
   },
   {
    "collapsible": 1,
