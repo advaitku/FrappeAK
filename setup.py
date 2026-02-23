@@ -1,9 +1,9 @@
 from setuptools import setup, find_packages
 
 setup(
-	name="automation_ak",
+	name="frappe_ak",
 	version="0.0.1",
-	description="Visual automation/workflow builder for Frappe Framework",
+	description="AKCOM Ledger, Automation Engine, and Document Designer for Frappe",
 	author="AK",
 	author_email="ak@example.com",
 	packages=find_packages(),

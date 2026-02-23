@@ -3,11 +3,11 @@ requires = ["flit_core >=3.4,<4"]
 build-backend = "flit_core.buildapi"
 
 [project]
-name = "automation_ak"
+name = "frappe_ak"
 authors = [
     { name = "AK" }
 ]
-description = "Visual automation/workflow builder for Frappe Framework"
+description = "AKCOM Ledger, Automation Engine, and Document Designer for Frappe"
 requires-python = ">=3.10"
 readme = "README.md"
 dynamic = ["version"]

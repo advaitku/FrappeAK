@@ -1,6 +1,6 @@
 {
-  "name": "automation_ak",
+  "name": "frappe_ak",
   "version": "0.0.1",
-  "description": "AutomationAK - Visual automation builder for Frappe",
+  "description": "Frappe AK - AKCOM Ledger, Automation Engine, and Document Designer",
   "license": "MIT"
 }
