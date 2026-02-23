@@ -41,8 +41,13 @@
         .ak-field-input:focus { outline: none; border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
         .ak-field-error .ak-field-input { border-color: #ef4444; box-shadow: 0 0 0 3px rgba(239,68,68,0.1); }
 
-        /* Buttons */
-        .ak-actions { display: flex; gap: 12px; justify-content: center; margin-top: 32px; padding-top: 24px; border-top: 1px solid #e5e7eb; }
+        /* Sticky Action Bar */
+        .ak-action-bar {
+            position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+            background: rgba(255,255,255,0.92); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-top: 1px solid #e5e7eb; box-shadow: 0 -4px 16px rgba(0,0,0,0.06); padding: 16px 20px;
+        }
+        .ak-action-bar-inner { max-width: 900px; margin: 0 auto; display: flex; gap: 12px; justify-content: flex-end; align-items: center; }
         .ak-accept-btn, .ak-submit-btn {
             padding: 12px 36px; background: #4f46e5; color: #fff; border: none; border-radius: 8px;
             font-size: 15px; font-weight: 600; cursor: pointer; transition: background 0.15s;
@@ -50,14 +55,14 @@
         }
         .ak-accept-btn:hover, .ak-submit-btn:hover { background: #4338ca; }
         .ak-decline-btn {
-            padding: 12px 36px; background: #fff; color: #dc2626; border: 2px solid #dc2626; border-radius: 8px;
+            padding: 12px 36px; background: transparent; color: #6b7280; border: 1px solid #d1d5db; border-radius: 8px;
             font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.15s;
             font-family: inherit; line-height: 1.4;
         }
-        .ak-decline-btn:hover { background: #fef2f2; }
+        .ak-decline-btn:hover { background: #fef2f2; color: #dc2626; border-color: #fca5a5; }
 
         /* Toast */
-        .ak-toast { position: fixed; bottom: 24px; right: 24px; padding: 12px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; z-index: 10000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: ak-toast-in 0.3s ease; }
+        .ak-toast { position: fixed; bottom: 96px; right: 24px; padding: 12px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; z-index: 10000; box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: ak-toast-in 0.3s ease; }
         .ak-toast-error { background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; }
         .ak-toast-success { background: #f0fdf4; color: #16a34a; border: 1px solid #86efac; }
         @keyframes ak-toast-in { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
@@ -81,12 +86,13 @@
         @media (max-width: 640px) {
             .ak-shared-page { padding: 0; }
             .ak-document-form { border-radius: 0; }
-            .ak-actions { flex-direction: column; padding: 16px; }
+            .ak-action-bar { padding: 12px 16px; }
+            .ak-action-bar-inner { flex-direction: column; }
             .ak-accept-btn, .ak-decline-btn, .ak-submit-btn { width: 100%; text-align: center; }
         }
     </style>
 </head>
-<body>
+<body style="padding-bottom: 80px;">
     {% block content %}{% endblock %}
 </body>
 </html>

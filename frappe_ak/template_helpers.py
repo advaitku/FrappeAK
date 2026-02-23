@@ -357,31 +357,35 @@ def ak_items_table(doc, columns=None, show_total=True, total_field="grand_total"
 
 
 def ak_accept_decline(accept_label="Accept", decline_label="Decline"):
-    """Render Accept and Decline buttons.
+    """Render Accept and Decline buttons in a sticky bottom action bar.
 
     Args:
         accept_label: Text for the accept button
         decline_label: Text for the decline button
     """
     return Markup(
-        f'<div class="ak-actions">'
-        f'<button type="button" class="ak-accept-btn" data-action="Accepted">'
-        f'{frappe.utils.escape_html(accept_label)}</button>'
+        f'<div class="ak-action-bar">'
+        f'<div class="ak-action-bar-inner">'
         f'<button type="button" class="ak-decline-btn" data-action="Declined">'
         f'{frappe.utils.escape_html(decline_label)}</button>'
+        f'<button type="button" class="ak-accept-btn" data-action="Accepted">'
+        f'{frappe.utils.escape_html(accept_label)}</button>'
+        f'</div>'
         f'</div>'
     )
 
 
 def ak_submit_button(label="Submit"):
-    """Render a submit button.
+    """Render a submit button in a sticky bottom action bar.
 
     Args:
         label: Button text
     """
     return Markup(
-        f'<div class="ak-actions">'
+        f'<div class="ak-action-bar">'
+        f'<div class="ak-action-bar-inner">'
         f'<button type="button" class="ak-submit-btn" data-action="Submitted">'
         f'{frappe.utils.escape_html(label)}</button>'
+        f'</div>'
         f'</div>'
     )

@@ -9,6 +9,12 @@
 
     const config = window.AK_DOCUMENT || {};
 
+    // Move action bar out of the form to body level so position:fixed works cleanly
+    const actionBar = document.querySelector(".ak-action-bar");
+    if (actionBar) {
+        document.body.appendChild(actionBar);
+    }
+
     if (config.isLocked) {
         disableAllFields();
         return;
@@ -29,6 +35,7 @@
         document.querySelectorAll(".ak-accept-btn, .ak-decline-btn, .ak-submit-btn").forEach((btn) => {
             btn.disabled = true;
             btn.style.opacity = "0.5";
+            btn.style.cursor = "not-allowed";
         });
     }
 
@@ -99,6 +106,9 @@
             .then((res) => res.json())
             .then((data) => {
                 if (data.message && data.message.success) {
+                    // Hide the action bar on success
+                    const bar = document.querySelector(".ak-action-bar");
+                    if (bar) bar.style.display = "none";
                     showSuccessPage(data.message.message);
                 } else if (data.exc) {
                     const errMsg = data._server_messages

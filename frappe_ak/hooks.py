@@ -2,7 +2,7 @@ app_name = "frappe_ak"
 app_title = "Frappe AK"
 app_publisher = "AK"
 app_description = "AKCOM Ledger, Automation Engine, and Document Designer for Frappe"
-app_email = "ak@example.com"
+app_email = "advait.k@swajal.in"
 app_license = "MIT"
 app_logo = "/assets/frappe_ak/images/ak_logo.svg"
 
