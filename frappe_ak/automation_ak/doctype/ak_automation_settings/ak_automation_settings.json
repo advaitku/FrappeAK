@@ -4,13 +4,6 @@
   "doctype": "DocType",
   "engine": "InnoDB",
   "field_order": [
-    "sb_whatsapp",
-    "whatsapp_provider",
-    "whatsapp_api_url",
-    "whatsapp_access_token",
-    "cb_wa",
-    "whatsapp_phone_number_id",
-    "whatsapp_from_number",
     "sb_general",
     "enable_logging",
     "log_retention_days",
@@ -18,47 +11,6 @@
     "default_email_sender"
   ],
   "fields": [
-    {
-      "fieldname": "sb_whatsapp",
-      "fieldtype": "Section Break",
-      "label": "WhatsApp Configuration"
-    },
-    {
-      "fieldname": "whatsapp_provider",
-      "fieldtype": "Select",
-      "label": "WhatsApp Provider",
-      "options": "\nMeta Cloud API\nTwilio\nCustom"
-    },
-    {
-      "description": "Base URL for the WhatsApp API (auto-filled for Meta Cloud API)",
-      "fieldname": "whatsapp_api_url",
-      "fieldtype": "Data",
-      "label": "API URL",
-      "depends_on": "whatsapp_provider"
-    },
-    {
-      "description": "Bearer token or API key from your WhatsApp provider",
-      "fieldname": "whatsapp_access_token",
-      "fieldtype": "Password",
-      "label": "Access Token",
-      "depends_on": "whatsapp_provider"
-    },
-    {
-      "fieldname": "cb_wa",
-      "fieldtype": "Column Break"
-    },
-    {
-      "fieldname": "whatsapp_phone_number_id",
-      "fieldtype": "Data",
-      "label": "Phone Number ID",
-      "depends_on": "eval:doc.whatsapp_provider=='Meta Cloud API'"
-    },
-    {
-      "fieldname": "whatsapp_from_number",
-      "fieldtype": "Data",
-      "label": "From Number",
-      "depends_on": "whatsapp_provider"
-    },
     {
       "fieldname": "sb_general",
       "fieldtype": "Section Break",
@@ -90,7 +42,7 @@
   ],
   "issingle": 1,
   "links": [],
-  "modified": "2026-02-20 00:00:00",
+  "modified": "2026-02-24 00:00:00",
   "modified_by": "Administrator",
   "module": "Automation AK",
   "name": "AK Automation Settings",

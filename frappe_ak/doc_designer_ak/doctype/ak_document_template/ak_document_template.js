@@ -10,6 +10,9 @@ frappe.ui.form.on("AK Document Template", {
             // Helper Reference button
             frm.add_custom_button(__("Helper Reference"), () => frm.trigger("show_helper_reference"), __("Actions"));
 
+            // Copy for AI button
+            frm.add_custom_button(__("Copy for AI"), () => frm.trigger("copy_for_ai"), __("Actions"));
+
             // Duplicate Template button
             frm.add_custom_button(__("Duplicate"), () => {
                 frappe.prompt(
@@ -372,6 +375,88 @@ frappe.ui.form.on("AK Document Template", {
         });
 
         d.show();
+    },
+
+    copy_for_ai(frm) {
+        if (!frm.doc.reference_doctype) {
+            frappe.msgprint(__("Please select a Reference DocType first."));
+            return;
+        }
+
+        frappe.call({
+            method: "frappe_ak.doc_api.get_doctype_fields",
+            args: { doctype_name: frm.doc.reference_doctype },
+            callback(r) {
+                if (!r.message) return;
+
+                const { fields, child_tables } = r.message;
+                let text = "";
+
+                text += "# AK Document Template — Field & Helper Reference\n";
+                text += "## DocType: " + frm.doc.reference_doctype + "\n\n";
+
+                // Document Fields
+                text += "## Document Fields\n";
+                text += "| fieldname | label | type | merge tag |\n";
+                text += "|-----------|-------|------|----------|\n";
+                for (const f of fields) {
+                    if (f.fieldtype === "Table" || f.fieldtype === "Table MultiSelect") continue;
+                    text += "| " + f.fieldname + " | " + (f.label || "") + " | " + f.fieldtype
+                        + " | {{ doc." + f.fieldname + " }} |\n";
+                }
+                text += "\n";
+
+                // Child Tables
+                const childKeys = Object.keys(child_tables);
+                for (const key of childKeys) {
+                    const ct = child_tables[key];
+                    text += "## Child Table: " + key + " (" + ct.doctype + ")\n";
+                    text += "Loop: {% for row in doc." + key + " %}...{% endfor %}\n";
+                    text += "| fieldname | label | type | in loop |\n";
+                    text += "|-----------|-------|------|--------|\n";
+                    for (const cf of ct.fields) {
+                        text += "| " + cf.fieldname + " | " + (cf.label || "") + " | " + cf.fieldtype
+                            + " | {{ row." + cf.fieldname + " }} |\n";
+                    }
+                    text += "\n";
+                }
+
+                // Helper Functions
+                text += "## Jinja2 Helper Functions\n";
+                text += '- {{ ak_input("fieldname", label="Label", value=doc.fieldname, placeholder="", editable=True, mandatory=False, input_type="text") }} — Text/number/email input\n';
+                text += '- {{ ak_textarea("fieldname", label="Label", value=doc.fieldname, rows=4, editable=True, mandatory=False) }} — Multi-line text\n';
+                text += '- {{ ak_date("fieldname", label="Label", value=doc.fieldname, editable=True, mandatory=False) }} — Date picker\n';
+                text += '- {{ ak_datetime("fieldname", label="Label", value=doc.fieldname, editable=True, mandatory=False) }} — Date+time picker\n';
+                text += '- {{ ak_checkbox("fieldname", label="Label", checked=doc.fieldname, editable=True) }} — Checkbox\n';
+                text += '- {{ ak_select("fieldname", label="Label", options=["A","B","C"], value=doc.fieldname, editable=True, mandatory=False) }} — Dropdown\n';
+                text += '- {{ ak_field_table(columns=2) }} — Auto-renders all fields from the Interactive Fields table (1 or 2 columns)\n';
+                text += '- {{ ak_items_table(doc, columns=["item_name","qty","rate","amount"], show_total=True) }} — Items/pricing table\n';
+                text += '- {{ ak_accept_decline(accept_label="Accept", decline_label="Decline") }} — Accept/Decline action bar\n';
+                text += '- {{ ak_submit_button(label="Submit") }} — Submit action bar\n\n';
+
+                // Utilities
+                text += "## Utilities & Conditionals\n";
+                text += '- {{ doc.fieldname }} — Output any field value\n';
+                text += '- {{ doc.fieldname or "N/A" }} — Default value if empty\n';
+                text += '- {{ format_currency(doc.grand_total) }} — Format as currency\n';
+                text += '- {{ frappe.utils.formatdate(doc.posting_date) }} — Format date\n';
+                text += '- {{ frappe.utils.fmt_money(doc.amount, currency="USD") }} — Format money with currency\n';
+                text += '- {{ nowdate() }} — Today\'s date\n';
+                text += '- {{ doc.items | length }} — Count child table rows\n';
+                text += '- {% if doc.fieldname %}...{% endif %} — Conditional block\n';
+                text += '- {% if doc.status == "Draft" %}...{% elif doc.status == "Overdue" %}...{% else %}...{% endif %} — Multiple conditions\n';
+                text += '- {% for row in doc.child_table %}{{ row.field }}{% endfor %} — Loop child table\n';
+                text += '- <div class="ak-page-break"></div> — Page break for PDF\n';
+                text += '- <div class="ak-notice">Warning text</div> — Notice/warning box\n';
+
+                navigator.clipboard.writeText(text).then(() => {
+                    frappe.show_alert({
+                        message: __("Copied! Paste into your AI chat to generate template HTML."),
+                        indicator: "green",
+                    }, 5);
+                });
+            },
+        });
     },
 });
 

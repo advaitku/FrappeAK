@@ -445,6 +445,11 @@ class TestCleanupOldLogs(UnitTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()
+		cls.test_todo = frappe.get_doc({
+			"doctype": "ToDo",
+			"description": "Cleanup test fixture",
+		}).insert(ignore_permissions=True)
+
 		cls.test_automation = frappe.get_doc({
 			"doctype": "AK Automation",
 			"title": "Cleanup Test Auto",
@@ -462,6 +467,7 @@ class TestCleanupOldLogs(UnitTestCase):
 	@classmethod
 	def tearDownClass(cls):
 		frappe.delete_doc("AK Automation", cls.test_automation.name, ignore_permissions=True, force=True)
+		frappe.delete_doc("ToDo", cls.test_todo.name, ignore_permissions=True, force=True)
 		frappe.db.commit()
 		super().tearDownClass()
 
@@ -472,7 +478,7 @@ class TestCleanupOldLogs(UnitTestCase):
 			"doctype": "AK Automation Log",
 			"automation": self.test_automation.name,
 			"reference_doctype": "ToDo",
-			"reference_name": "test",
+			"reference_name": self.test_todo.name,
 			"trigger_type": "On Create",
 			"status": "Success",
 			"executed_at": old_date,
@@ -494,7 +500,7 @@ class TestCleanupOldLogs(UnitTestCase):
 			"doctype": "AK Automation Log",
 			"automation": self.test_automation.name,
 			"reference_doctype": "ToDo",
-			"reference_name": "test",
+			"reference_name": self.test_todo.name,
 			"trigger_type": "On Create",
 			"status": "Success",
 			"executed_at": frappe.utils.now_datetime(),
@@ -518,6 +524,11 @@ class TestLogExecution(UnitTestCase):
 	@classmethod
 	def setUpClass(cls):
 		super().setUpClass()
+		cls.test_todo = frappe.get_doc({
+			"doctype": "ToDo",
+			"description": "Log execution test fixture",
+		}).insert(ignore_permissions=True)
+
 		cls.test_automation = frappe.get_doc({
 			"doctype": "AK Automation",
 			"title": "Log Test Auto",
@@ -542,55 +553,61 @@ class TestLogExecution(UnitTestCase):
 		for log_name in logs:
 			frappe.delete_doc("AK Automation Log", log_name, ignore_permissions=True, force=True)
 		frappe.delete_doc("AK Automation", cls.test_automation.name, ignore_permissions=True, force=True)
+		frappe.delete_doc("ToDo", cls.test_todo.name, ignore_permissions=True, force=True)
 		frappe.db.commit()
 		super().tearDownClass()
 
+	def _cleanup_logs(self, reference_name):
+		logs = frappe.get_all("AK Automation Log",
+			filters={"automation": self.test_automation.name, "reference_name": reference_name},
+			pluck="name",
+		)
+		for log_name in logs:
+			frappe.delete_doc("AK Automation Log", log_name, ignore_permissions=True, force=True)
+
 	def test_creates_log_when_enabled(self):
-		doc = frappe._dict({"doctype": "ToDo", "name": "T-LOG"})
+		doc = frappe._dict({"doctype": "ToDo", "name": self.test_todo.name})
 		with patch("frappe.get_single") as mock_settings:
 			mock_settings.return_value = frappe._dict({"enable_logging": 1})
 			_log_execution(self.test_automation, doc, "On Create", "Success", elapsed_ms=42.5)
 
 		logs = frappe.get_all("AK Automation Log",
-			filters={"automation": self.test_automation.name, "reference_name": "T-LOG"},
+			filters={"automation": self.test_automation.name, "reference_name": self.test_todo.name},
 			pluck="name",
 		)
 		self.assertTrue(len(logs) > 0)
-		for log_name in logs:
-			frappe.delete_doc("AK Automation Log", log_name, ignore_permissions=True, force=True)
+		self._cleanup_logs(self.test_todo.name)
 
 	def test_skips_when_logging_disabled(self):
-		doc = frappe._dict({"doctype": "ToDo", "name": "T-NOLOG"})
+		doc = frappe._dict({"doctype": "ToDo", "name": self.test_todo.name})
 		with patch("frappe.get_single") as mock_settings:
 			mock_settings.return_value = frappe._dict({"enable_logging": 0})
 			_log_execution(self.test_automation, doc, "On Create", "Success")
 
 		logs = frappe.get_all("AK Automation Log",
-			filters={"automation": self.test_automation.name, "reference_name": "T-NOLOG"},
+			filters={"automation": self.test_automation.name, "reference_name": self.test_todo.name},
 			pluck="name",
 		)
 		self.assertEqual(len(logs), 0)
 
 	def test_actions_json_serialized(self):
-		doc = frappe._dict({"doctype": "ToDo", "name": "T-JSON"})
+		doc = frappe._dict({"doctype": "ToDo", "name": self.test_todo.name})
 		actions = [{"action_type": "Update Fields", "status": "Success", "result": "ok"}]
 		with patch("frappe.get_single") as mock_settings:
 			mock_settings.return_value = frappe._dict({"enable_logging": 1})
 			_log_execution(self.test_automation, doc, "On Create", "Success", actions_executed=actions)
 
 		logs = frappe.get_all("AK Automation Log",
-			filters={"automation": self.test_automation.name, "reference_name": "T-JSON"},
+			filters={"automation": self.test_automation.name, "reference_name": self.test_todo.name},
 			fields=["name", "actions_executed"],
 		)
 		self.assertTrue(len(logs) > 0)
 		parsed = json.loads(logs[0].actions_executed)
 		self.assertEqual(parsed[0]["action_type"], "Update Fields")
-
-		for log in logs:
-			frappe.delete_doc("AK Automation Log", log.name, ignore_permissions=True, force=True)
+		self._cleanup_logs(self.test_todo.name)
 
 	def test_error_traceback_stored(self):
-		doc = frappe._dict({"doctype": "ToDo", "name": "T-ERR"})
+		doc = frappe._dict({"doctype": "ToDo", "name": self.test_todo.name})
 		with patch("frappe.get_single") as mock_settings:
 			mock_settings.return_value = frappe._dict({"enable_logging": 1})
 			_log_execution(
@@ -599,36 +616,34 @@ class TestLogExecution(UnitTestCase):
 			)
 
 		logs = frappe.get_all("AK Automation Log",
-			filters={"automation": self.test_automation.name, "reference_name": "T-ERR"},
+			filters={"automation": self.test_automation.name, "reference_name": self.test_todo.name},
 			fields=["name", "error_traceback", "status"],
 		)
 		self.assertTrue(len(logs) > 0)
 		self.assertEqual(logs[0].status, "Failed")
 		self.assertIn("ValueError", logs[0].error_traceback)
-
-		for log in logs:
-			frappe.delete_doc("AK Automation Log", log.name, ignore_permissions=True, force=True)
+		self._cleanup_logs(self.test_todo.name)
 
 
 class TestCronAutomations(UnitTestCase):
 	"""Tests for cron automation scheduling."""
 
 	def test_run_cron_automations_skips_non_matching(self):
-		"""Cron that doesn't match current time should not execute."""
+		"""Cron that fires far in the past should not execute."""
 		with (
 			patch("frappe.get_all", return_value=["AUTO-CRON"]),
 			patch("frappe.get_doc") as mock_getdoc,
 			patch("frappe_ak.dispatcher.engine._run_cron_automation") as mock_run,
+			patch("frappe.log_error"),
 		):
-			# Set up a cron expression that won't match (Feb 30 doesn't exist)
+			# Use a cron that only fires Jan 1 at midnight — very unlikely to match now
 			mock_auto = frappe._dict({
 				"name": "AUTO-CRON",
-				"cron_expression": "0 0 30 2 *",
+				"cron_expression": "0 0 1 1 *",
 			})
 			mock_getdoc.return_value = mock_auto
 
 			from frappe_ak.dispatcher.engine import run_cron_automations
-			# The croniter will compute prev fire time far in the past
 			run_cron_automations()
 			mock_run.assert_not_called()
 
@@ -648,3 +663,107 @@ class TestCronAutomations(UnitTestCase):
 			from frappe_ak.dispatcher.engine import run_cron_automations
 			run_cron_automations()
 			mock_log_err.assert_called()
+
+	def test_matching_cron_fires_automation(self):
+		"""Cron whose previous fire time is within 60 seconds should execute."""
+		from datetime import datetime
+		from unittest.mock import MagicMock
+
+		now = datetime(2026, 2, 24, 10, 0, 30)  # 30 seconds past 10:00
+		prev_time = datetime(2026, 2, 24, 10, 0, 0)  # Exactly 10:00
+
+		mock_cron_instance = MagicMock()
+		mock_cron_instance.get_prev.return_value = prev_time
+
+		with (
+			patch("frappe.get_all", return_value=["AUTO-MATCH"]),
+			patch("frappe.get_doc") as mock_getdoc,
+			patch("frappe_ak.dispatcher.engine._run_cron_automation") as mock_run,
+			patch("frappe.utils.now_datetime", return_value=now),
+			patch("croniter.croniter", return_value=mock_cron_instance),
+			patch("frappe.log_error"),
+		):
+			mock_auto = frappe._dict({
+				"name": "AUTO-MATCH",
+				"cron_expression": "0 10 * * *",
+			})
+			mock_getdoc.return_value = mock_auto
+
+			from frappe_ak.dispatcher.engine import run_cron_automations
+			run_cron_automations()
+			mock_run.assert_called_once_with(mock_auto)
+
+	def test_run_cron_automation_executes_matching_docs(self):
+		"""Cron automation should execute actions for docs where conditions pass."""
+		from frappe_ak.dispatcher.engine import _run_cron_automation
+
+		mock_auto = frappe._dict({
+			"name": "AUTO-CRON",
+			"reference_doctype": "ToDo",
+			"actions": [
+				frappe._dict({"action_type": "Run Script", "enabled": 1, "script_code": "1"}),
+			],
+		})
+
+		mock_doc_pass = frappe._dict({"doctype": "ToDo", "name": "T-PASS"})
+		mock_doc_fail = frappe._dict({"doctype": "ToDo", "name": "T-FAIL"})
+
+		def mock_get_doc(dt, name):
+			return mock_doc_pass if name == "T-PASS" else mock_doc_fail
+
+		def mock_conditions(auto, doc):
+			return doc.name == "T-PASS"
+
+		with (
+			patch("frappe.get_all", return_value=["T-PASS", "T-FAIL"]),
+			patch("frappe.get_doc", side_effect=mock_get_doc),
+			patch("frappe_ak.dispatcher.engine.evaluate_conditions", side_effect=mock_conditions),
+			patch("frappe_ak.dispatcher.actions.execute_action") as mock_exec,
+		):
+			_run_cron_automation(mock_auto)
+
+		# Only T-PASS should have had actions executed
+		self.assertEqual(mock_exec.call_count, 1)
+		call_args = mock_exec.call_args[0]
+		self.assertEqual(call_args[1].name, "T-PASS")
+
+	def test_run_cron_automation_skips_all_when_conditions_fail(self):
+		"""No actions should fire when conditions fail for all docs."""
+		from frappe_ak.dispatcher.engine import _run_cron_automation
+
+		mock_auto = frappe._dict({
+			"name": "AUTO-CRON",
+			"reference_doctype": "ToDo",
+			"actions": [
+				frappe._dict({"action_type": "Run Script", "enabled": 1, "script_code": "1"}),
+			],
+		})
+
+		with (
+			patch("frappe.get_all", return_value=["T-1", "T-2"]),
+			patch("frappe.get_doc", return_value=frappe._dict({"doctype": "ToDo", "name": "T-1"})),
+			patch("frappe_ak.dispatcher.engine.evaluate_conditions", return_value=False),
+			patch("frappe_ak.dispatcher.actions.execute_action") as mock_exec,
+		):
+			_run_cron_automation(mock_auto)
+
+		mock_exec.assert_not_called()
+
+	def test_cron_respects_100_doc_limit(self):
+		"""Cron automation should limit document fetching to 100."""
+		from frappe_ak.dispatcher.engine import _run_cron_automation
+
+		mock_auto = frappe._dict({
+			"name": "AUTO-CRON",
+			"reference_doctype": "ToDo",
+			"actions": [],
+		})
+
+		with (
+			patch("frappe.get_all", return_value=[]) as mock_getall,
+			patch("frappe_ak.dispatcher.engine.evaluate_conditions"),
+		):
+			_run_cron_automation(mock_auto)
+
+		call_kwargs = mock_getall.call_args
+		self.assertEqual(call_kwargs[1]["limit"], 100)

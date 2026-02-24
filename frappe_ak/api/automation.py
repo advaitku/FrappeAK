@@ -168,21 +168,20 @@ def get_button_automations(doctype):
 
 @frappe.whitelist()
 def test_whatsapp_connection():
-	"""Test that WhatsApp API credentials are valid."""
-	settings = frappe.get_single("AK Automation Settings")
-	if not settings.whatsapp_provider:
-		return {"success": False, "error": "No WhatsApp provider configured"}
+	"""Test that the frappe_whatsapp integration is configured and active."""
+	if not frappe.db.exists("DocType", "WhatsApp Settings"):
+		return {"success": False, "error": "frappe_whatsapp app is not installed"}
 
 	try:
-		if settings.whatsapp_provider == "Meta Cloud API":
-			import requests
-			token = settings.get_password("whatsapp_access_token")
-			phone_id = settings.whatsapp_phone_number_id
-			url = f"https://graph.facebook.com/v18.0/{phone_id}"
-			resp = requests.get(url, headers={"Authorization": f"Bearer {token}"}, timeout=10)
-			if resp.status_code == 200:
-				return {"success": True}
-			return {"success": False, "error": f"HTTP {resp.status_code}: {resp.text[:200]}"}
-		return {"success": False, "error": "Connection test not implemented for this provider"}
+		settings = frappe.get_single("WhatsApp Settings")
+		default_account = settings.default_outgoing_account
+		if not default_account:
+			return {"success": False, "error": "No default outgoing WhatsApp account configured"}
+
+		account = frappe.get_doc("WhatsApp Account", default_account)
+		if account.status != "Active":
+			return {"success": False, "error": f"WhatsApp account '{default_account}' is not active (status: {account.status})"}
+
+		return {"success": True, "account": default_account}
 	except Exception as e:
 		return {"success": False, "error": str(e)}

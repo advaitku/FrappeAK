@@ -7,6 +7,14 @@ from frappe.tests import UnitTestCase
 from frappe_ak.dispatcher.actions import execute_action, ACTION_MODULE_MAP
 
 
+def _mock_doc(fields):
+	"""Create a mock doc that supports as_dict() and set() like a Document."""
+	doc = frappe._dict(fields)
+	doc.as_dict = lambda: dict(fields)
+	doc.set = lambda k, v: doc.__setitem__(k, v)
+	return doc
+
+
 class TestExecuteActionDispatch(UnitTestCase):
 	"""Tests for the action dispatcher routing in __init__.py."""
 
@@ -97,7 +105,7 @@ class TestUpdateFieldsAction(UnitTestCase):
 		"""Static value should be set on the document."""
 		updates = [{"target_field": "status", "value_type": "Static Value", "value": "Closed"}]
 		action = self._make_action(json_updates=updates)
-		doc = frappe._dict({"doctype": "ToDo", "name": "T-1", "status": "Open"})
+		doc = _mock_doc({"doctype": "ToDo", "name": "T-1", "status": "Open"})
 		auto = self._make_auto()
 
 		with patch("frappe.db.set_value"):
@@ -111,7 +119,7 @@ class TestUpdateFieldsAction(UnitTestCase):
 		"""'Use Field' should copy from another field on the doc."""
 		updates = [{"target_field": "description", "value_type": "Use Field", "source_field": "status"}]
 		action = self._make_action(json_updates=updates)
-		doc = frappe._dict({"doctype": "ToDo", "name": "T-1", "status": "Open", "description": ""})
+		doc = _mock_doc({"doctype": "ToDo", "name": "T-1", "status": "Open", "description": ""})
 		auto = self._make_auto()
 
 		with patch("frappe.db.set_value"):
@@ -124,7 +132,7 @@ class TestUpdateFieldsAction(UnitTestCase):
 		"""'Today' should set to today's date."""
 		updates = [{"target_field": "date", "value_type": "Today"}]
 		action = self._make_action(json_updates=updates)
-		doc = frappe._dict({"doctype": "ToDo", "name": "T-1", "date": None})
+		doc = _mock_doc({"doctype": "ToDo", "name": "T-1", "date": None})
 		auto = self._make_auto()
 
 		with patch("frappe.db.set_value"):
@@ -137,7 +145,7 @@ class TestUpdateFieldsAction(UnitTestCase):
 		"""'Today + N Days' should add N days."""
 		updates = [{"target_field": "date", "value_type": "Today + N Days", "days_offset": 7}]
 		action = self._make_action(json_updates=updates)
-		doc = frappe._dict({"doctype": "ToDo", "name": "T-1", "date": None})
+		doc = _mock_doc({"doctype": "ToDo", "name": "T-1", "date": None})
 		auto = self._make_auto()
 
 		with patch("frappe.db.set_value"):
@@ -151,7 +159,7 @@ class TestUpdateFieldsAction(UnitTestCase):
 		"""'Today - N Days' should subtract N days."""
 		updates = [{"target_field": "date", "value_type": "Today - N Days", "days_offset": 3}]
 		action = self._make_action(json_updates=updates)
-		doc = frappe._dict({"doctype": "ToDo", "name": "T-1", "date": None})
+		doc = _mock_doc({"doctype": "ToDo", "name": "T-1", "date": None})
 		auto = self._make_auto()
 
 		with patch("frappe.db.set_value"):
@@ -165,7 +173,7 @@ class TestUpdateFieldsAction(UnitTestCase):
 		"""'Current User' should resolve to frappe.session.user."""
 		updates = [{"target_field": "allocated_to", "value_type": "Current User"}]
 		action = self._make_action(json_updates=updates)
-		doc = frappe._dict({"doctype": "ToDo", "name": "T-1", "allocated_to": None})
+		doc = _mock_doc({"doctype": "ToDo", "name": "T-1", "allocated_to": None})
 		auto = self._make_auto()
 
 		with patch("frappe.db.set_value"):
@@ -178,7 +186,7 @@ class TestUpdateFieldsAction(UnitTestCase):
 		"""'Clear' should set the field to None."""
 		updates = [{"target_field": "description", "value_type": "Clear"}]
 		action = self._make_action(json_updates=updates)
-		doc = frappe._dict({"doctype": "ToDo", "name": "T-1", "description": "old value"})
+		doc = _mock_doc({"doctype": "ToDo", "name": "T-1", "description": "old value"})
 		auto = self._make_auto()
 
 		with patch("frappe.db.set_value"):
@@ -190,7 +198,7 @@ class TestUpdateFieldsAction(UnitTestCase):
 	def test_no_updates_returns_message(self):
 		"""When no updates defined, should return info message."""
 		action = self._make_action(json_updates=None)
-		doc = frappe._dict({"doctype": "ToDo", "name": "T-1"})
+		doc = _mock_doc({"doctype": "ToDo", "name": "T-1"})
 		auto = self._make_auto(field_updates=[])
 
 		from frappe_ak.dispatcher.actions.update_fields import execute
@@ -201,7 +209,7 @@ class TestUpdateFieldsAction(UnitTestCase):
 		"""On Create trigger should use db_set to avoid re-triggering."""
 		updates = [{"target_field": "status", "value_type": "Static Value", "value": "Closed"}]
 		action = self._make_action(json_updates=updates)
-		doc = frappe._dict({"doctype": "ToDo", "name": "T-1", "status": "Open"})
+		doc = _mock_doc({"doctype": "ToDo", "name": "T-1", "status": "Open"})
 		auto = self._make_auto(trigger_type="On Create")
 
 		with patch("frappe.db.set_value") as mock_set:
@@ -213,7 +221,7 @@ class TestUpdateFieldsAction(UnitTestCase):
 		"""before_save trigger should use doc.set (no db_set)."""
 		updates = [{"target_field": "status", "value_type": "Static Value", "value": "Closed"}]
 		action = self._make_action(json_updates=updates)
-		doc = frappe._dict({"doctype": "ToDo", "name": "T-1", "status": "Open"})
+		doc = _mock_doc({"doctype": "ToDo", "name": "T-1", "status": "Open"})
 		auto = self._make_auto(trigger_type="before_save")
 
 		with patch("frappe.db.set_value") as mock_set:
@@ -239,7 +247,7 @@ class TestUpdateFieldsAction(UnitTestCase):
 		}
 
 		action = self._make_action(json_updates=None)
-		doc = frappe._dict({"doctype": "ToDo", "name": "T-1", "status": "Open"})
+		doc = _mock_doc({"doctype": "ToDo", "name": "T-1", "status": "Open"})
 		auto = self._make_auto(field_updates=[child])
 
 		with patch("frappe.db.set_value"):
@@ -338,13 +346,29 @@ class TestCreateRecordAction(UnitTestCase):
 class TestCreateTodoAction(UnitTestCase):
 	"""Tests for create_todo.py action handler."""
 
+	@classmethod
+	def setUpClass(cls):
+		super().setUpClass()
+		# Create a real ToDo to use as the triggering document (for Dynamic Link validation)
+		cls.trigger_doc = frappe.get_doc({
+			"doctype": "ToDo",
+			"description": "Trigger doc for create_todo tests",
+		}).insert(ignore_permissions=True)
+		frappe.db.commit()
+
+	@classmethod
+	def tearDownClass(cls):
+		frappe.delete_doc("ToDo", cls.trigger_doc.name, ignore_permissions=True, force=True)
+		frappe.db.commit()
+		super().tearDownClass()
+
 	def test_creates_todo_with_defaults(self):
 		"""Should create a ToDo with default values."""
 		action = frappe._dict({
 			"action_type": "Create Todo",
 			"record_values_json": None,
 		})
-		doc = frappe._dict({"doctype": "Event", "name": "EVT-1"})
+		doc = self.trigger_doc
 		auto = frappe._dict({"name": "AUTO-TD"})
 
 		from frappe_ak.dispatcher.actions.create_todo import execute
@@ -353,9 +377,9 @@ class TestCreateTodoAction(UnitTestCase):
 		self.assertIn("Created ToDo", result)
 		todo_name = result.split(": ")[1]
 		todo = frappe.get_doc("ToDo", todo_name)
-		self.assertIn("EVT-1", todo.description)
-		self.assertEqual(todo.reference_type, "Event")
-		self.assertEqual(todo.reference_name, "EVT-1")
+		self.assertIn(doc.name, todo.description)
+		self.assertEqual(todo.reference_type, "ToDo")
+		self.assertEqual(todo.reference_name, doc.name)
 		frappe.delete_doc("ToDo", todo_name, ignore_permissions=True, force=True)
 
 	def test_custom_config(self):
@@ -369,7 +393,7 @@ class TestCreateTodoAction(UnitTestCase):
 			"action_type": "Create Todo",
 			"record_values_json": json.dumps(config),
 		})
-		doc = frappe._dict({"doctype": "Event", "name": "EVT-2"})
+		doc = self.trigger_doc
 		auto = frappe._dict({"name": "AUTO-TD"})
 
 		from frappe_ak.dispatcher.actions.create_todo import execute
@@ -388,7 +412,7 @@ class TestCreateTodoAction(UnitTestCase):
 			"action_type": "Create Todo",
 			"record_values_json": json.dumps(config),
 		})
-		doc = frappe._dict({"doctype": "Event", "name": "EVT-JINJA"})
+		doc = self.trigger_doc
 		auto = frappe._dict({"name": "AUTO-TD"})
 
 		from frappe_ak.dispatcher.actions.create_todo import execute
@@ -396,7 +420,7 @@ class TestCreateTodoAction(UnitTestCase):
 
 		todo_name = result.split(": ")[1]
 		todo = frappe.get_doc("ToDo", todo_name)
-		self.assertIn("EVT-JINJA", todo.description)
+		self.assertIn(doc.name, todo.description)
 		frappe.delete_doc("ToDo", todo_name, ignore_permissions=True, force=True)
 
 
@@ -573,6 +597,108 @@ class TestHTTPRequestAction(UnitTestCase):
 
 		self.assertEqual(mock_req.call_args[1]["timeout"], 30)
 
+	def test_network_timeout_raises(self):
+		"""requests.Timeout should propagate (not swallowed)."""
+		import requests as req_lib
+		action = frappe._dict({
+			"action_type": "HTTP Request",
+			"http_url": "https://example.com/api",
+			"http_method": "GET",
+			"http_headers": None,
+			"http_body": None,
+		})
+		doc = frappe._dict({"doctype": "ToDo", "name": "T-1"})
+		auto = frappe._dict({"name": "AUTO-HTTP"})
+
+		with patch("frappe_ak.dispatcher.actions.http_request.requests.request", side_effect=req_lib.exceptions.Timeout("timed out")):
+			from frappe_ak.dispatcher.actions.http_request import execute
+			with self.assertRaises(req_lib.exceptions.Timeout):
+				execute(action, doc, auto)
+
+	def test_connection_error_raises(self):
+		"""requests.ConnectionError should propagate."""
+		import requests as req_lib
+		action = frappe._dict({
+			"action_type": "HTTP Request",
+			"http_url": "https://example.com/api",
+			"http_method": "GET",
+			"http_headers": None,
+			"http_body": None,
+		})
+		doc = frappe._dict({"doctype": "ToDo", "name": "T-1"})
+		auto = frappe._dict({"name": "AUTO-HTTP"})
+
+		with patch("frappe_ak.dispatcher.actions.http_request.requests.request", side_effect=req_lib.exceptions.ConnectionError("refused")):
+			from frappe_ak.dispatcher.actions.http_request import execute
+			with self.assertRaises(req_lib.exceptions.ConnectionError):
+				execute(action, doc, auto)
+
+	def test_http_500_still_returns_success_message(self):
+		"""HTTP 500 responses still return success message (code doesn't check status)."""
+		action = frappe._dict({
+			"action_type": "HTTP Request",
+			"http_url": "https://example.com/api",
+			"http_method": "GET",
+			"http_headers": None,
+			"http_body": None,
+		})
+		doc = frappe._dict({"doctype": "ToDo", "name": "T-1"})
+		auto = frappe._dict({"name": "AUTO-HTTP"})
+
+		mock_resp = MagicMock()
+		mock_resp.status_code = 500
+
+		with patch("frappe_ak.dispatcher.actions.http_request.requests.request", return_value=mock_resp):
+			from frappe_ak.dispatcher.actions.http_request import execute
+			result = execute(action, doc, auto)
+
+		self.assertIn("500", result)
+
+	def test_malformed_json_headers_ignored(self):
+		"""Invalid JSON in headers should be silently ignored, keeping defaults."""
+		action = frappe._dict({
+			"action_type": "HTTP Request",
+			"http_url": "https://example.com/api",
+			"http_method": "GET",
+			"http_headers": "not valid json",
+			"http_body": None,
+		})
+		doc = frappe._dict({"doctype": "ToDo", "name": "T-1"})
+		auto = frappe._dict({"name": "AUTO-HTTP"})
+
+		mock_resp = MagicMock()
+		mock_resp.status_code = 200
+
+		with patch("frappe_ak.dispatcher.actions.http_request.requests.request", return_value=mock_resp) as mock_req:
+			from frappe_ak.dispatcher.actions.http_request import execute
+			execute(action, doc, auto)
+
+		headers = mock_req.call_args[1]["headers"]
+		self.assertEqual(headers, {"Content-Type": "application/json"})
+
+	def test_malformed_json_body_sent_as_string(self):
+		"""Non-JSON body should be sent as raw string data, not json."""
+		action = frappe._dict({
+			"action_type": "HTTP Request",
+			"http_url": "https://example.com/api",
+			"http_method": "POST",
+			"http_headers": None,
+			"http_body": "plain text body",
+		})
+		doc = frappe._dict({"doctype": "ToDo", "name": "T-1"})
+		auto = frappe._dict({"name": "AUTO-HTTP"})
+
+		mock_resp = MagicMock()
+		mock_resp.status_code = 200
+
+		with patch("frappe_ak.dispatcher.actions.http_request.requests.request", return_value=mock_resp) as mock_req:
+			from frappe_ak.dispatcher.actions.http_request import execute
+			execute(action, doc, auto)
+
+		call_kwargs = mock_req.call_args[1]
+		self.assertEqual(call_kwargs["data"], "plain text body")
+		self.assertIsNone(call_kwargs["json"])
+
 
 class TestRunScriptAction(UnitTestCase):
 	"""Tests for run_script.py action handler."""
@@ -623,6 +749,17 @@ class TestRunScriptAction(UnitTestCase):
 		action = frappe._dict({"action_type": "Run Script", "script_code": script})
 		doc = frappe._dict({"doctype": "ToDo", "name": "T-1"})
 		auto = frappe._dict({"name": "AUTO-RS"})
+
+		from frappe_ak.dispatcher.actions.run_script import execute
+		result = execute(action, doc, auto)
+		self.assertEqual(result, "Script executed")
+
+	def test_script_context_has_automation(self):
+		"""Script should have access to the automation object."""
+		script = "automation.get('name')"
+		action = frappe._dict({"action_type": "Run Script", "script_code": script})
+		doc = frappe._dict({"doctype": "ToDo", "name": "T-1"})
+		auto = frappe._dict({"name": "AUTO-RS", "title": "My Automation"})
 
 		from frappe_ak.dispatcher.actions.run_script import execute
 		result = execute(action, doc, auto)
@@ -719,12 +856,72 @@ class TestSendEmailAction(UnitTestCase):
 		self.assertEqual(_split_emails(""), [])
 		self.assertEqual(_split_emails(None), [])
 
+	def test_attach_print_included(self):
+		"""When attach_print=1 and print_format set, attachment should be included."""
+		action = self._make_action(attach_print=1, print_format="Standard")
+		doc = frappe._dict({"doctype": "ToDo", "name": "T-1"})
+		auto = frappe._dict({"name": "AUTO-EM", "title": "Test"})
+
+		with (
+			patch("frappe.sendmail") as mock_send,
+			patch("frappe.attach_print", return_value={"fname": "doc.pdf"}) as mock_attach,
+		):
+			from frappe_ak.dispatcher.actions.send_email import execute
+			execute(action, doc, auto)
+
+		mock_attach.assert_called_once_with("ToDo", "T-1", print_format="Standard")
+		call_kwargs = mock_send.call_args[1]
+		self.assertEqual(call_kwargs["attachments"], [{"fname": "doc.pdf"}])
+
+	def test_attach_print_skipped_without_format(self):
+		"""When attach_print=1 but no print_format, no attachment should be added."""
+		action = self._make_action(attach_print=1, print_format="")
+		doc = frappe._dict({"doctype": "ToDo", "name": "T-1"})
+		auto = frappe._dict({"name": "AUTO-EM", "title": "Test"})
+
+		with (
+			patch("frappe.sendmail") as mock_send,
+			patch("frappe.attach_print") as mock_attach,
+		):
+			from frappe_ak.dispatcher.actions.send_email import execute
+			execute(action, doc, auto)
+
+		mock_attach.assert_not_called()
+		call_kwargs = mock_send.call_args[1]
+		self.assertIsNone(call_kwargs["attachments"])
+
+	def test_email_template_used(self):
+		"""When email_template is set, template subject/body should be used."""
+		action = self._make_action(
+			email_template="My Template",
+			email_subject="",
+			email_body="should not be used",
+		)
+		doc = frappe._dict({"doctype": "ToDo", "name": "T-1"})
+		auto = frappe._dict({"name": "AUTO-EM", "title": "Test"})
+
+		mock_template = frappe._dict({
+			"subject": "Template Subject: {{ doc.name }}",
+			"response": "Template Body: {{ doc.name }}",
+		})
+
+		with (
+			patch("frappe.sendmail") as mock_send,
+			patch("frappe.get_doc", return_value=mock_template),
+		):
+			from frappe_ak.dispatcher.actions.send_email import execute
+			execute(action, doc, auto)
+
+		call_kwargs = mock_send.call_args[1]
+		self.assertIn("T-1", call_kwargs["subject"])
+		self.assertIn("Template Body", call_kwargs["message"])
+
 
 class TestSendWhatsAppAction(UnitTestCase):
-	"""Tests for send_whatsapp.py action handler."""
+	"""Tests for send_whatsapp.py action handler (via frappe_whatsapp)."""
 
-	def test_no_provider_throws(self):
-		"""Missing WhatsApp provider should throw."""
+	def test_not_installed_throws(self):
+		"""Missing frappe_whatsapp app should throw."""
 		action = frappe._dict({
 			"action_type": "Send WhatsApp",
 			"wa_to": "+1234567890",
@@ -734,8 +931,7 @@ class TestSendWhatsAppAction(UnitTestCase):
 		doc = frappe._dict({"doctype": "ToDo", "name": "T-1"})
 		auto = frappe._dict({"name": "AUTO-WA"})
 
-		with patch("frappe.get_single") as mock_settings:
-			mock_settings.return_value = frappe._dict({"whatsapp_provider": None})
+		with patch("frappe.db.exists", return_value=False):
 			from frappe_ak.dispatcher.actions.send_whatsapp import execute
 			with self.assertRaises(Exception):
 				execute(action, doc, auto)
@@ -752,10 +948,9 @@ class TestSendWhatsAppAction(UnitTestCase):
 		auto = frappe._dict({"name": "AUTO-WA"})
 
 		with (
-			patch("frappe.get_single") as mock_settings,
+			patch("frappe.db.exists", return_value=True),
 			patch("frappe.log_error"),
 		):
-			mock_settings.return_value = frappe._dict({"whatsapp_provider": "Meta Cloud API"})
 			from frappe_ak.dispatcher.actions.send_whatsapp import execute
 			result = execute(action, doc, auto)
 			self.assertIsNone(result)
@@ -769,8 +964,8 @@ class TestSendWhatsAppAction(UnitTestCase):
 		self.assertEqual(_normalize_phone("+91-98765-43210"), "+919876543210")
 		self.assertEqual(_normalize_phone("  +1234  "), "+1234")
 
-	def test_meta_text_message(self):
-		"""Meta Cloud API text message should be sent correctly."""
+	def test_text_message_creates_whatsapp_doc(self):
+		"""Text message should create a WhatsApp Message doc with correct fields."""
 		action = frappe._dict({
 			"action_type": "Send WhatsApp",
 			"wa_to": "+1234567890",
@@ -780,32 +975,32 @@ class TestSendWhatsAppAction(UnitTestCase):
 		doc = frappe._dict({"doctype": "ToDo", "name": "T-1"})
 		auto = frappe._dict({"name": "AUTO-WA"})
 
-		mock_settings = frappe._dict({
-			"whatsapp_provider": "Meta Cloud API",
-			"whatsapp_phone_number_id": "12345",
-			"whatsapp_api_url": None,
-		})
-		mock_settings.get_password = lambda x: "test-token"
-
-		mock_resp = MagicMock()
-		mock_resp.raise_for_status = MagicMock()
+		mock_msg_doc = MagicMock()
+		mock_msg_doc.name = "WA-MSG-001"
 
 		with (
-			patch("frappe.get_single", return_value=mock_settings),
-			patch("frappe_ak.dispatcher.actions.send_whatsapp.requests.post", return_value=mock_resp) as mock_post,
+			patch("frappe.db.exists", return_value=True),
+			patch("frappe.new_doc", return_value=mock_msg_doc) as mock_new_doc,
 		):
 			from frappe_ak.dispatcher.actions.send_whatsapp import execute
 			result = execute(action, doc, auto)
 
-		mock_post.assert_called_once()
-		call_kwargs = mock_post.call_args
-		payload = call_kwargs[1]["json"]
-		self.assertEqual(payload["type"], "text")
-		self.assertEqual(payload["text"]["body"], "Hello World")
-		self.assertIn("+1234567890", result)
+		mock_new_doc.assert_called_once_with("WhatsApp Message")
+		# Check first update call — common fields
+		first_update = mock_msg_doc.update.call_args_list[0][0][0]
+		self.assertEqual(first_update["type"], "Outgoing")
+		self.assertEqual(first_update["to"], "+1234567890")
+		self.assertEqual(first_update["reference_doctype"], "ToDo")
+		self.assertEqual(first_update["reference_name"], "T-1")
+		# Check second update call — text message fields
+		second_update = mock_msg_doc.update.call_args_list[1][0][0]
+		self.assertEqual(second_update["content_type"], "text")
+		self.assertEqual(second_update["message"], "Hello World")
+		mock_msg_doc.insert.assert_called_once_with(ignore_permissions=True)
+		self.assertIn("WA-MSG-001", result)
 
-	def test_meta_template_message(self):
-		"""Meta Cloud API template message should use template payload."""
+	def test_template_message_creates_whatsapp_doc(self):
+		"""Template message should create a WhatsApp Message doc with template fields."""
 		action = frappe._dict({
 			"action_type": "Send WhatsApp",
 			"wa_to": "+1234567890",
@@ -815,54 +1010,68 @@ class TestSendWhatsAppAction(UnitTestCase):
 		doc = frappe._dict({"doctype": "ToDo", "name": "T-1"})
 		auto = frappe._dict({"name": "AUTO-WA"})
 
-		mock_settings = frappe._dict({
-			"whatsapp_provider": "Meta Cloud API",
-			"whatsapp_phone_number_id": "12345",
-			"whatsapp_api_url": None,
-		})
-		mock_settings.get_password = lambda x: "test-token"
-
-		mock_resp = MagicMock()
-		mock_resp.raise_for_status = MagicMock()
+		mock_msg_doc = MagicMock()
+		mock_msg_doc.name = "WA-MSG-002"
 
 		with (
-			patch("frappe.get_single", return_value=mock_settings),
-			patch("frappe_ak.dispatcher.actions.send_whatsapp.requests.post", return_value=mock_resp) as mock_post,
+			patch("frappe.db.exists", return_value=True),
+			patch("frappe.new_doc", return_value=mock_msg_doc),
 		):
 			from frappe_ak.dispatcher.actions.send_whatsapp import execute
 			execute(action, doc, auto)
 
-		payload = mock_post.call_args[1]["json"]
-		self.assertEqual(payload["type"], "template")
-		self.assertEqual(payload["template"]["name"], "hello_world")
+		# Check second update call — template fields
+		second_update = mock_msg_doc.update.call_args_list[1][0][0]
+		self.assertEqual(second_update["message_type"], "Template")
+		self.assertEqual(second_update["use_template"], 1)
+		self.assertEqual(second_update["template"], "hello_world")
+		mock_msg_doc.insert.assert_called_once_with(ignore_permissions=True)
 
-	def test_custom_api_url(self):
-		"""Custom API URL should be used instead of default graph.facebook.com."""
+	def test_jinja_rendering_in_phone(self):
+		"""Phone number should support Jinja templates."""
+		action = frappe._dict({
+			"action_type": "Send WhatsApp",
+			"wa_to": "{{ doc.phone }}",
+			"wa_message_body": "Hello",
+			"wa_template_name": None,
+		})
+		doc = frappe._dict({"doctype": "ToDo", "name": "T-1", "phone": "+919876543210"})
+		auto = frappe._dict({"name": "AUTO-WA"})
+
+		mock_msg_doc = MagicMock()
+		mock_msg_doc.name = "WA-MSG-003"
+
+		with (
+			patch("frappe.db.exists", return_value=True),
+			patch("frappe.new_doc", return_value=mock_msg_doc),
+		):
+			from frappe_ak.dispatcher.actions.send_whatsapp import execute
+			execute(action, doc, auto)
+
+		first_update = mock_msg_doc.update.call_args_list[0][0][0]
+		self.assertEqual(first_update["to"], "+919876543210")
+
+	def test_reference_doctype_and_name_set(self):
+		"""WhatsApp Message doc should include triggering doc's doctype and name."""
 		action = frappe._dict({
 			"action_type": "Send WhatsApp",
 			"wa_to": "+1234567890",
-			"wa_message_body": "Test",
+			"wa_message_body": "Hello",
 			"wa_template_name": None,
 		})
-		doc = frappe._dict({"doctype": "ToDo", "name": "T-1"})
+		doc = frappe._dict({"doctype": "Sales Order", "name": "SO-001"})
 		auto = frappe._dict({"name": "AUTO-WA"})
 
-		mock_settings = frappe._dict({
-			"whatsapp_provider": "Meta Cloud API",
-			"whatsapp_phone_number_id": "12345",
-			"whatsapp_api_url": "https://custom.api.com/v1",
-		})
-		mock_settings.get_password = lambda x: "test-token"
-
-		mock_resp = MagicMock()
-		mock_resp.raise_for_status = MagicMock()
+		mock_msg_doc = MagicMock()
+		mock_msg_doc.name = "WA-MSG-REF"
 
 		with (
-			patch("frappe.get_single", return_value=mock_settings),
-			patch("frappe_ak.dispatcher.actions.send_whatsapp.requests.post", return_value=mock_resp) as mock_post,
+			patch("frappe.db.exists", return_value=True),
+			patch("frappe.new_doc", return_value=mock_msg_doc),
 		):
 			from frappe_ak.dispatcher.actions.send_whatsapp import execute
 			execute(action, doc, auto)
 
-		call_url = mock_post.call_args[0][0]
-		self.assertTrue(call_url.startswith("https://custom.api.com/v1"))
+		first_update = mock_msg_doc.update.call_args_list[0][0][0]
+		self.assertEqual(first_update["reference_doctype"], "Sales Order")
+		self.assertEqual(first_update["reference_name"], "SO-001")

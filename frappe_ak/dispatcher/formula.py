@@ -57,7 +57,7 @@ def evaluate_expression(expr, doc):
 	- if status == 'Open' then 'Active' else 'Inactive' end
 	- concat(firstname, ' ', lastname)
 	"""
-	if not expr:
+	if not expr or not expr.strip():
 		return None
 
 	expr = expr.strip()

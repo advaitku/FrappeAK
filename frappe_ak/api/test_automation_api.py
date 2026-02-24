@@ -1,7 +1,7 @@
 """Tests for API endpoints in api/automation.py."""
 
 import json
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 import frappe
 from frappe.tests import UnitTestCase
@@ -211,6 +211,53 @@ class TestRunButtonAutomation(UnitTestCase):
 				self.non_button_auto.name, "ToDo", self.test_todo.name,
 			)
 
+	def test_permission_denied_throws(self):
+		"""Should throw PermissionError when user lacks write access."""
+		with patch.object(
+			type(frappe.get_doc("ToDo", self.test_todo.name)),
+			"check_permission",
+			side_effect=frappe.PermissionError("No write access"),
+		):
+			with self.assertRaises(frappe.PermissionError):
+				run_button_automation(
+					self.button_auto.name, "ToDo", self.test_todo.name,
+				)
+
+	def test_action_failure_propagates(self):
+		"""Action exceptions should propagate up, not be swallowed."""
+		with patch("frappe_ak.dispatcher.actions.execute_action", side_effect=Exception("action failed")):
+			with self.assertRaises(Exception) as ctx:
+				run_button_automation(
+					self.button_auto.name, "ToDo", self.test_todo.name,
+				)
+			self.assertIn("action failed", str(ctx.exception))
+
+	def test_empty_actions_returns_ok(self):
+		"""Automation with no enabled actions should still return ok."""
+		empty_auto = frappe.get_doc({
+			"doctype": "AK Automation",
+			"title": "Empty Actions Auto",
+			"reference_doctype": "ToDo",
+			"trigger_type": "Macro (Button)",
+			"enabled": 1,
+			"actions": [{
+				"action_type": "Run Script",
+				"action_label": "Disabled",
+				"enabled": 0,
+				"script_code": "1",
+			}],
+		}).insert(ignore_permissions=True)
+		frappe.db.commit()
+
+		try:
+			result = run_button_automation(
+				empty_auto.name, "ToDo", self.test_todo.name,
+			)
+			self.assertEqual(result["status"], "ok")
+		finally:
+			frappe.delete_doc("AK Automation", empty_auto.name, ignore_permissions=True, force=True)
+			frappe.db.commit()
+
 
 class TestTestAutomation(UnitTestCase):
 	"""Tests for test_automation (dry-run) API."""
@@ -315,56 +362,54 @@ class TestGetButtonAutomations(UnitTestCase):
 
 
 class TestWhatsAppConnection(UnitTestCase):
-	"""Tests for test_whatsapp_connection API."""
+	"""Tests for test_whatsapp_connection API (via frappe_whatsapp)."""
 
-	def test_no_provider_returns_failure(self):
-		with patch("frappe.get_single") as mock_settings:
-			mock_settings.return_value = frappe._dict({"whatsapp_provider": None})
+	def test_not_installed_returns_failure(self):
+		"""Should fail when frappe_whatsapp is not installed."""
+		with patch("frappe.db.exists", return_value=False):
 			result = test_whatsapp_connection()
 		self.assertFalse(result["success"])
-		self.assertIn("No WhatsApp provider", result["error"])
+		self.assertIn("not installed", result["error"])
 
-	def test_meta_success(self):
-		mock_settings = frappe._dict({
-			"whatsapp_provider": "Meta Cloud API",
-			"whatsapp_phone_number_id": "12345",
-		})
-		mock_settings.get_password = lambda x: "test-token"
-
-		mock_resp = MagicMock()
-		mock_resp.status_code = 200
+	def test_no_outgoing_account_returns_failure(self):
+		"""Should fail when no default outgoing account is configured."""
+		mock_settings = frappe._dict({"default_outgoing_account": None})
 
 		with (
+			patch("frappe.db.exists", return_value=True),
 			patch("frappe.get_single", return_value=mock_settings),
-			patch("frappe_ak.api.automation.requests.get", return_value=mock_resp),
+		):
+			result = test_whatsapp_connection()
+
+		self.assertFalse(result["success"])
+		self.assertIn("No default outgoing", result["error"])
+
+	def test_inactive_account_returns_failure(self):
+		"""Should fail when the WhatsApp account is not active."""
+		mock_settings = frappe._dict({"default_outgoing_account": "My WA Account"})
+		mock_account = frappe._dict({"status": "Inactive"})
+
+		with (
+			patch("frappe.db.exists", return_value=True),
+			patch("frappe.get_single", return_value=mock_settings),
+			patch("frappe.get_doc", return_value=mock_account),
+		):
+			result = test_whatsapp_connection()
+
+		self.assertFalse(result["success"])
+		self.assertIn("not active", result["error"])
+
+	def test_active_account_returns_success(self):
+		"""Should succeed when account is active."""
+		mock_settings = frappe._dict({"default_outgoing_account": "My WA Account"})
+		mock_account = frappe._dict({"status": "Active"})
+
+		with (
+			patch("frappe.db.exists", return_value=True),
+			patch("frappe.get_single", return_value=mock_settings),
+			patch("frappe.get_doc", return_value=mock_account),
 		):
 			result = test_whatsapp_connection()
 
 		self.assertTrue(result["success"])
-
-	def test_meta_failure(self):
-		mock_settings = frappe._dict({
-			"whatsapp_provider": "Meta Cloud API",
-			"whatsapp_phone_number_id": "12345",
-		})
-		mock_settings.get_password = lambda x: "bad-token"
-
-		mock_resp = MagicMock()
-		mock_resp.status_code = 401
-		mock_resp.text = "Unauthorized"
-
-		with (
-			patch("frappe.get_single", return_value=mock_settings),
-			patch("frappe_ak.api.automation.requests.get", return_value=mock_resp),
-		):
-			result = test_whatsapp_connection()
-
-		self.assertFalse(result["success"])
-		self.assertIn("401", result["error"])
-
-	def test_twilio_not_implemented(self):
-		with patch("frappe.get_single") as mock_settings:
-			mock_settings.return_value = frappe._dict({"whatsapp_provider": "Twilio"})
-			result = test_whatsapp_connection()
-		self.assertFalse(result["success"])
-		self.assertIn("not implemented", result["error"])
+		self.assertEqual(result["account"], "My WA Account")
