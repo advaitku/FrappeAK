@@ -33,8 +33,11 @@ def submit_response(secret_key, response_type, field_values):
         frappe.throw(_("This document has already been submitted"))
 
     from frappe.utils import now_datetime, get_datetime
-    if get_datetime(share.expires_at) < now_datetime():
-        frappe.throw(_("This document link has expired"))
+    is_expired = share.status == "Expired"
+    if not is_expired and share.expires_at:
+        is_expired = get_datetime(share.expires_at) < now_datetime()
+    if is_expired:
+        frappe.throw(_("This link has expired"))
 
     template = frappe.get_doc("AK Document Template", share.template)
 
@@ -132,6 +135,10 @@ def submit_response(secret_key, response_type, field_values):
                 "content": pdf_bytes,
             })
             _file.save(ignore_permissions=True)
+
+            # Save file URL on response and share for easy access
+            frappe.db.set_value("AK Document Response", response.name, "attached_pdf", _file.file_url)
+            frappe.db.set_value("AK Document Share", share.name, "attached_pdf", _file.file_url)
         except Exception:
             frappe.log_error(
                 f"PDF attachment failed for response {response.name}",
@@ -238,8 +245,9 @@ def download_pdf(secret_key):
     from frappe.utils import now_datetime, get_datetime
     if not share.is_active:
         frappe.throw(_("This document link is no longer active"))
-    if share.expires_at and get_datetime(share.expires_at) < now_datetime():
-        frappe.throw(_("This document link has expired"))
+    is_expired = share.expires_at and get_datetime(share.expires_at) < now_datetime()
+    if is_expired:
+        frappe.throw(_("This link has expired"))
 
     share_doc = frappe.get_doc("AK Document Share", share.name)
     from frappe_ak.renderer import render_template_as_pdf

@@ -42,14 +42,19 @@ def get_context(context):
         context.error_code = "not_found"
         return
 
-    # Check if expired
-    if get_datetime(share.expires_at) < now_datetime():
-        # Auto-expire
-        frappe.db.set_value("AK Document Share", share.name, {
-            "is_active": 0,
-            "status": "Expired",
-        })
-        context.error = _("This document link has expired")
+    # Check if expired (by status or by expiry datetime)
+    is_expired = share.status == "Expired"
+    if not is_expired and share.expires_at:
+        is_expired = get_datetime(share.expires_at) < now_datetime()
+
+    if is_expired:
+        # Auto-expire if not already
+        if share.is_active or share.status != "Expired":
+            frappe.db.set_value("AK Document Share", share.name, {
+                "is_active": 0,
+                "status": "Expired",
+            })
+        context.error = _("This link has expired")
         context.error_code = "expired"
         return
 

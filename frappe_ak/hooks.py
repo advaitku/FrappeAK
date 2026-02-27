@@ -1,18 +1,14 @@
 app_name = "frappe_ak"
 app_title = "Frappe AK"
 app_publisher = "AK"
-app_description = "AKCOM Ledger, Automation Engine, and Document Designer for Frappe"
+app_description = "AKCOM Ledger and Document Designer for Frappe"
 app_email = "advait.k@swajal.in"
 app_license = "MIT"
 app_logo = "/assets/frappe_ak/images/ak_logo.svg"
 
 # App includes (loaded on every Desk page)
 app_include_js = [
-    "/assets/frappe_ak/js/ak_buttons.bundle.js",
     "/assets/frappe_ak/js/share_button.bundle.js",
-]
-app_include_css = [
-    "/assets/frappe_ak/css/automation_ak.css",
 ]
 
 # Setup
@@ -41,21 +37,9 @@ email_templates = [
 # Document Events
 doc_events = {
     "*": {
-        # Automation engine dispatcher
-        "after_insert": [
-            "frappe_ak.dispatcher.engine.handle_event",
-            "frappe_ak.doc_api.check_auto_send",
-        ],
-        "on_update": [
-            "frappe_ak.dispatcher.engine.handle_event",
-            "frappe_ak.doc_api.check_auto_send",
-        ],
-        "before_save": "frappe_ak.dispatcher.engine.handle_event",
-        "on_submit": [
-            "frappe_ak.dispatcher.engine.handle_event",
-            "frappe_ak.doc_api.check_auto_send",
-        ],
-        "on_cancel": "frappe_ak.dispatcher.engine.handle_event",
+        "after_insert": "frappe_ak.doc_api.check_auto_send",
+        "on_update": "frappe_ak.doc_api.check_auto_send",
+        "on_submit": "frappe_ak.doc_api.check_auto_send",
     }
 }
 
@@ -80,14 +64,8 @@ fixtures = [
 
 # Scheduled Tasks
 scheduler_events = {
-    "cron": {
-        "* * * * *": "frappe_ak.dispatcher.engine.run_cron_automations",
-    },
     "hourly": [
         "frappe_ak.tasks.expire_shares",
         "frappe_ak.tasks.send_reminders",
-    ],
-    "daily": [
-        "frappe_ak.dispatcher.engine.cleanup_old_logs",
     ],
 }

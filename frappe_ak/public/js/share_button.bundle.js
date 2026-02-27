@@ -10,8 +10,7 @@ const _DD_SKIP_DOCTYPES = [
     "AK Document Settings",
 ];
 
-// Use the jQuery form-refresh event — the same reliable pattern
-// that automation_ak uses. frappe.ui.form.on_doctype_event does
+// Use the jQuery form-refresh event. frappe.ui.form.on_doctype_event does
 // not exist in Frappe v16.
 $(document).on("form-refresh", function (e, frm) {
     if (!frm || !frm.doc || frm.doc.__islocal) return;

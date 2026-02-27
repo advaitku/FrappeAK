@@ -1,3 +1,2 @@
 AKCOM
-Automation AK
 Doc Designer AK

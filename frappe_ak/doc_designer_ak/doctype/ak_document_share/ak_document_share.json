@@ -22,6 +22,7 @@
   "column_break_status",
   "submitted_at",
   "is_locked",
+  "attached_pdf",
   "email_section",
   "email_sent",
   "email_sent_at",
@@ -136,6 +137,12 @@
    "fieldname": "is_locked",
    "fieldtype": "Check",
    "label": "Is Locked",
+   "read_only": 1
+  },
+  {
+   "fieldname": "attached_pdf",
+   "fieldtype": "Attach",
+   "label": "Attached PDF",
    "read_only": 1
   },
   {
