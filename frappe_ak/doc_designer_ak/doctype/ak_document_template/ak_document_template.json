@@ -9,6 +9,9 @@
   "reference_doctype",
   "is_active",
   "is_public_form",
+  "display_conditions_section",
+  "condition_logic",
+  "display_conditions",
   "preview_section",
   "preview_document",
   "preview_html",
@@ -83,6 +86,28 @@
    "fieldname": "is_public_form",
    "fieldtype": "Check",
    "label": "Is Public Form"
+  },
+  {
+   "collapsible": 1,
+   "fieldname": "display_conditions_section",
+   "fieldtype": "Section Break",
+   "label": "Display Conditions",
+   "description": "Define when this template appears in the Share dialog. If no conditions are set, the template always appears."
+  },
+  {
+   "default": "All",
+   "fieldname": "condition_logic",
+   "fieldtype": "Select",
+   "label": "Condition Logic",
+   "options": "All\nAny",
+   "description": "'All' = every condition must match. 'Any' = at least one condition must match."
+  },
+  {
+   "fieldname": "display_conditions",
+   "fieldtype": "Table",
+   "label": "Conditions",
+   "options": "AK Display Condition",
+   "description": "When conditions are defined, this template only appears for documents that match."
   },
   {
    "fieldname": "preview_section",

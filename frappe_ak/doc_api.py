@@ -419,6 +419,96 @@ def get_doctype_fields(doctype_name):
     }
 
 
+@frappe.whitelist()
+def get_matching_templates(reference_doctype, reference_name):
+    """Return active templates for a DocType, filtered by display conditions.
+
+    Templates with no display conditions always match.
+    Templates with conditions are evaluated against the current document.
+    """
+    templates = frappe.get_all(
+        "AK Document Template",
+        filters={"reference_doctype": reference_doctype, "is_active": 1},
+        fields=["name", "template_name", "expires_in_days", "condition_logic"],
+    )
+
+    if not templates:
+        return []
+
+    doc = frappe.get_doc(reference_doctype, reference_name)
+
+    matching = []
+    for tmpl in templates:
+        conditions = frappe.get_all(
+            "AK Display Condition",
+            filters={"parent": tmpl.name, "parenttype": "AK Document Template"},
+            fields=["field_name", "operator", "value"],
+            order_by="idx asc",
+        )
+
+        if not conditions:
+            matching.append({
+                "name": tmpl.name,
+                "template_name": tmpl.template_name,
+                "expires_in_days": tmpl.expires_in_days,
+            })
+            continue
+
+        if _evaluate_conditions(doc, conditions, tmpl.condition_logic or "All"):
+            matching.append({
+                "name": tmpl.name,
+                "template_name": tmpl.template_name,
+                "expires_in_days": tmpl.expires_in_days,
+            })
+
+    return matching
+
+
+def _evaluate_conditions(doc, conditions, logic="All"):
+    """Evaluate a list of conditions against a document."""
+    results = [_evaluate_single_condition(doc.get(c.field_name), c.operator, c.value) for c in conditions]
+    return all(results) if logic == "All" else any(results)
+
+
+def _evaluate_single_condition(field_value, operator, compare_value):
+    """Evaluate a single field condition."""
+    from frappe.utils import flt
+
+    if operator == "is set":
+        return field_value is not None and str(field_value).strip() not in ("", "0")
+
+    if operator == "is not set":
+        return field_value is None or str(field_value).strip() in ("", "0")
+
+    if operator == "equals":
+        return str(field_value or "") == str(compare_value or "")
+
+    if operator == "not equals":
+        return str(field_value or "") != str(compare_value or "")
+
+    if operator == "greater than":
+        try:
+            return flt(field_value) > flt(compare_value)
+        except (ValueError, TypeError):
+            return str(field_value or "") > str(compare_value or "")
+
+    if operator == "less than":
+        try:
+            return flt(field_value) < flt(compare_value)
+        except (ValueError, TypeError):
+            return str(field_value or "") < str(compare_value or "")
+
+    if operator == "in":
+        options = [v.strip() for v in (compare_value or "").split(",")]
+        return str(field_value or "") in options
+
+    if operator == "not in":
+        options = [v.strip() for v in (compare_value or "").split(",")]
+        return str(field_value or "") not in options
+
+    return False
+
+
 def notify_on_view(share_name):
     """Send a notification to the sender when a document is viewed.
 
@@ -489,10 +579,20 @@ def check_auto_send(doc, method):
             "auto_send_on": event_name,
             "reference_doctype": doc.doctype,
         },
-        fields=["name", "auto_send_to_field", "expires_in_days"],
+        fields=["name", "auto_send_to_field", "expires_in_days", "condition_logic"],
     )
 
     for tmpl in templates:
+        # Check display conditions
+        conditions = frappe.get_all(
+            "AK Display Condition",
+            filters={"parent": tmpl.name, "parenttype": "AK Document Template"},
+            fields=["field_name", "operator", "value"],
+            order_by="idx asc",
+        )
+        if conditions and not _evaluate_conditions(doc, conditions, tmpl.condition_logic or "All"):
+            continue
+
         recipient = doc.get(tmpl.auto_send_to_field) if tmpl.auto_send_to_field else None
         if not recipient:
             continue

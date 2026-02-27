@@ -46,9 +46,10 @@ frappe.ui.form.on("AK Document Template", {
             }, __("Actions"));
         }
 
-        // Populate response action field options
+        // Populate response action and display condition field options
         if (frm.doc.reference_doctype) {
             _ak_populate_response_action_fields(frm);
+            _ak_populate_display_condition_fields(frm);
         }
 
         // Render preview if document is selected
@@ -74,6 +75,7 @@ frappe.ui.form.on("AK Document Template", {
         frm.set_value("auto_send_doctype_filter", "");
         if (frm.doc.reference_doctype) {
             _ak_populate_response_action_fields(frm);
+            _ak_populate_display_condition_fields(frm);
         }
     },
 
@@ -618,5 +620,82 @@ frappe.ui.form.on("AK Response Action", {
             grid.update_docfield_property("value", "options", "");
             grid.refresh();
         }
+    },
+});
+
+
+// ── Display Condition child table: populate field_name options ──
+
+function _ak_populate_display_condition_fields(frm) {
+    const ref_dt = frm.doc.reference_doctype;
+    if (!ref_dt) return;
+
+    const apply = (cache) => {
+        const grid = frm.fields_dict.display_conditions.grid;
+        grid.update_docfield_property("field_name", "options", cache.fields_str);
+        grid.refresh();
+    };
+
+    // Reuse the same cache as response action fields
+    if (_ak_ra_cache[ref_dt]) {
+        apply(_ak_ra_cache[ref_dt]);
+        return;
+    }
+
+    frappe.call({
+        method: "frappe_ak.doc_api.get_doctype_fields",
+        args: { doctype_name: ref_dt },
+        callback(r) {
+            if (r.message && r.message.fields) {
+                const meta = {};
+                const names = [];
+                for (const f of r.message.fields) {
+                    if (["Table", "Table MultiSelect"].includes(f.fieldtype)) continue;
+                    names.push(f.fieldname);
+                    meta[f.fieldname] = {
+                        fieldtype: f.fieldtype,
+                        options: f.options || "",
+                        label: f.label || f.fieldname,
+                    };
+                }
+                _ak_ra_cache[ref_dt] = {
+                    fields_str: "\n" + names.join("\n"),
+                    meta: meta,
+                };
+                apply(_ak_ra_cache[ref_dt]);
+            }
+        },
+    });
+}
+
+frappe.ui.form.on("AK Display Condition", {
+    field_name(frm, cdt, cdn) {
+        const row = locals[cdt][cdn];
+        if (!row.field_name) return;
+
+        const options = _ak_get_value_options_for_field(frm, row.field_name);
+        const grid = frm.fields_dict.display_conditions.grid;
+
+        if (options) {
+            grid.update_docfield_property("value", "fieldtype", "Select");
+            grid.update_docfield_property("value", "options", "\n" + options);
+        } else {
+            grid.update_docfield_property("value", "fieldtype", "Data");
+            grid.update_docfield_property("value", "options", "");
+        }
+        grid.refresh();
+    },
+
+    operator(frm, cdt, cdn) {
+        const row = locals[cdt][cdn];
+        const grid = frm.fields_dict.display_conditions.grid;
+
+        if (row.operator === "is set" || row.operator === "is not set") {
+            frappe.model.set_value(cdt, cdn, "value", "");
+            grid.update_docfield_property("value", "read_only", 1);
+        } else {
+            grid.update_docfield_property("value", "read_only", 0);
+        }
+        grid.refresh();
     },
 });

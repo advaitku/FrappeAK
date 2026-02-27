@@ -4,42 +4,52 @@
  */
 
 let _dd_template_cache = {};
+const _DD_CACHE_MAX = 50;
 const _DD_SKIP_DOCTYPES = [
     "AK Document Template", "AK Document Share",
     "AK Document Response", "AK Document View Log",
     "AK Document Settings",
 ];
 
+function _dd_cache_key(frm) {
+    return frm.doc.doctype + ":" + frm.doc.name;
+}
+
 // Use the jQuery form-refresh event. frappe.ui.form.on_doctype_event does
 // not exist in Frappe v16.
 $(document).on("form-refresh", function (e, frm) {
     if (!frm || !frm.doc || frm.doc.__islocal) return;
     if (_DD_SKIP_DOCTYPES.includes(frm.doc.doctype)) return;
+    // Clear cache for this document so conditions re-evaluate after saves
+    delete _dd_template_cache[_dd_cache_key(frm)];
     _dd_check_and_add_button(frm);
 });
 
 function _dd_check_and_add_button(frm) {
-    const dt = frm.doc.doctype;
+    const key = _dd_cache_key(frm);
 
-    if (_dd_template_cache[dt] !== undefined) {
-        if (_dd_template_cache[dt].length) {
-            _dd_add_button(frm, _dd_template_cache[dt]);
+    if (_dd_template_cache[key] !== undefined) {
+        if (_dd_template_cache[key].length) {
+            _dd_add_button(frm, _dd_template_cache[key]);
         }
         return;
     }
 
-    frappe.xcall("frappe.client.get_list", {
-        doctype: "AK Document Template",
-        filters: { reference_doctype: dt, is_active: 1 },
-        fields: ["name", "template_name", "expires_in_days"],
-        limit_page_length: 0,
+    frappe.xcall("frappe_ak.doc_api.get_matching_templates", {
+        reference_doctype: frm.doc.doctype,
+        reference_name: frm.doc.name,
     }).then((templates) => {
-        _dd_template_cache[dt] = templates || [];
-        if (_dd_template_cache[dt].length) {
-            _dd_add_button(frm, _dd_template_cache[dt]);
+        _dd_template_cache[key] = templates || [];
+        if (_dd_template_cache[key].length) {
+            _dd_add_button(frm, _dd_template_cache[key]);
+        }
+        // Cap cache size
+        const keys = Object.keys(_dd_template_cache);
+        if (keys.length > _DD_CACHE_MAX) {
+            delete _dd_template_cache[keys[0]];
         }
     }).catch(() => {
-        _dd_template_cache[dt] = [];
+        _dd_template_cache[key] = [];
     });
 }
 

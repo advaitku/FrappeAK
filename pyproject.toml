@@ -7,7 +7,7 @@ name = "frappe_ak"
 authors = [
     { name = "AK" }
 ]
-description = "AKCOM Ledger, Automation Engine, and Document Designer for Frappe"
+description = "AKCOM Ledger and Document Designer for Frappe"
 requires-python = ">=3.10"
 readme = "README.md"
 dynamic = ["version"]
