@@ -572,15 +572,19 @@ def check_auto_send(doc, method):
     if not event_name:
         return
 
-    templates = frappe.get_all(
-        "AK Document Template",
-        filters={
-            "is_active": 1,
-            "auto_send_on": event_name,
-            "reference_doctype": doc.doctype,
-        },
-        fields=["name", "auto_send_to_field", "expires_in_days", "condition_logic"],
-    )
+    try:
+        templates = frappe.get_all(
+            "AK Document Template",
+            filters={
+                "is_active": 1,
+                "auto_send_on": event_name,
+                "reference_doctype": doc.doctype,
+            },
+            fields=["name", "auto_send_to_field", "expires_in_days", "condition_logic"],
+        )
+    except Exception:
+        # Schema not yet migrated — condition_logic column may not exist
+        return
 
     for tmpl in templates:
         # Check display conditions

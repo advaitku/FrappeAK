@@ -517,9 +517,10 @@ class TestCheckAutoSend(UnitTestCase, DocDesignerTestMixin):
 		doc = frappe._dict({"doctype": "ToDo", "name": "T-1", "owner": ""})
 		templates = [frappe._dict({
 			"name": "TMPL-1", "auto_send_to_field": "owner", "expires_in_days": 7,
+			"condition_logic": "All",
 		})]
 		with (
-			patch("frappe.get_all", return_value=templates),
+			patch("frappe.get_all", side_effect=[templates, []]),
 			patch("frappe_ak.doc_api.create_share") as mock_create,
 		):
 			check_auto_send(doc, "after_insert")
@@ -531,9 +532,10 @@ class TestCheckAutoSend(UnitTestCase, DocDesignerTestMixin):
 		})
 		templates = [frappe._dict({
 			"name": "TMPL-1", "auto_send_to_field": "assigned_by", "expires_in_days": 7,
+			"condition_logic": "All",
 		})]
 		with (
-			patch("frappe.get_all", return_value=templates),
+			patch("frappe.get_all", side_effect=[templates, []]),
 			patch("frappe_ak.doc_api.create_share", return_value={"name": "AK-DS-999"}) as mock_create,
 			patch("frappe_ak.doc_api.send_document_email") as mock_send,
 		):
