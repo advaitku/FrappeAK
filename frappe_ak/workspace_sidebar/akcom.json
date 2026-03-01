@@ -1,0 +1,53 @@
+{
+ "app": "frappe_ak",
+ "creation": "2026-02-27 00:00:00.000000",
+ "docstatus": 0,
+ "doctype": "Workspace Sidebar",
+ "header_icon": "book-open",
+ "idx": 0,
+ "items": [
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "home",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "Home",
+   "link_to": "AKCOM",
+   "link_type": "Workspace",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "user",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "AKCOM Person",
+   "link_to": "AKCOM Person",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  },
+  {
+   "child": 0,
+   "collapsible": 1,
+   "icon": "book-open",
+   "indent": 0,
+   "keep_closed": 0,
+   "label": "AKCOM Ledger Entry",
+   "link_to": "AKCOM Ledger Entry",
+   "link_type": "DocType",
+   "show_arrow": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-02-27 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "AKCOM",
+ "name": "AKCOM",
+ "owner": "Administrator",
+ "standard": 1,
+ "title": "AKCOM"
+}
