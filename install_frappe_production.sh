@@ -127,10 +127,10 @@ else
     PYTHON_BIN="python3"
 fi
 
-# ─── Step 4: Install Node.js 18 via NodeSource ───────────────────────────────
-if ! command -v node &> /dev/null || [[ $(node -v | cut -d. -f1 | tr -d 'v') -lt 18 ]]; then
-    log "Installing Node.js 18..."
-    curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+# ─── Step 4: Install Node.js 20 LTS via NodeSource ───────────────────────────
+if ! command -v node &> /dev/null || [[ $(node -v | cut -d. -f1 | tr -d 'v') -lt 20 ]]; then
+    log "Installing Node.js 20 LTS..."
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
     apt-get install -y -qq nodejs
 fi
 log "Node.js $(node -v) installed"

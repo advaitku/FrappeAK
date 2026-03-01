@@ -148,7 +148,8 @@ def _build_context(doc):
 	"""Build the evaluation context dict from a document."""
 	context = {}
 	# Add all doc fields as top-level variables
-	for key in doc.as_dict():
+	doc_dict = doc.as_dict() if hasattr(doc, "as_dict") else dict(doc)
+	for key in doc_dict:
 		context[key] = doc.get(key)
 	# Also available as doc.fieldname
 	context["doc"] = doc
