@@ -1,0 +1,105 @@
+{
+ "charts": [],
+ "content": "[{\"id\":\"ak_header_1\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Your Automations</b></span>\",\"col\":12}},{\"id\":\"ak_sc_auto\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"AK Automation\",\"col\":4}},{\"id\":\"ak_sc_log\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"AK Automation Log\",\"col\":4}},{\"id\":\"ak_sc_settings\",\"type\":\"shortcut\",\"data\":{\"shortcut_name\":\"AK Automation Settings\",\"col\":4}},{\"id\":\"ak_spacer_1\",\"type\":\"spacer\",\"data\":{\"col\":12}},{\"id\":\"ak_header_2\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\"><b>Quick Links</b></span>\",\"col\":12}},{\"id\":\"ak_card_auto\",\"type\":\"card\",\"data\":{\"card_name\":\"Automations\",\"col\":6}},{\"id\":\"ak_card_mon\",\"type\":\"card\",\"data\":{\"card_name\":\"Monitoring\",\"col\":6}}]",
+ "creation": "2026-02-20 00:00:00.000000",
+ "custom_blocks": [],
+ "docstatus": 0,
+ "doctype": "Workspace",
+ "for_user": "",
+ "hide_custom": 0,
+ "icon": "refresh",
+ "idx": 0,
+ "is_hidden": 0,
+ "label": "Automation AK",
+ "links": [
+  {
+   "description": "Create and manage automation rules",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Automations",
+   "link_count": 2,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "AK Automation",
+   "link_count": 0,
+   "link_to": "AK Automation",
+   "link_type": "DocType",
+   "onboard": 1,
+   "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "AK Automation Settings",
+   "link_count": 0,
+   "link_to": "AK Automation Settings",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  },
+  {
+   "description": "View execution logs and troubleshoot",
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Monitoring",
+   "link_count": 1,
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Card Break"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "AK Automation Log",
+   "link_count": 0,
+   "link_to": "AK Automation Log",
+   "link_type": "DocType",
+   "onboard": 0,
+   "type": "Link"
+  }
+ ],
+ "modified": "2026-02-20 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "Automation AK",
+ "name": "Automation AK",
+ "number_cards": [],
+ "owner": "Administrator",
+ "parent_page": "",
+ "public": 1,
+ "quick_lists": [],
+ "restrict_to_domain": "",
+ "roles": [],
+ "sequence_id": 100.0,
+ "shortcuts": [
+  {
+   "color": "Blue",
+   "doc_view": "List",
+   "icon": "refresh",
+   "label": "AK Automation",
+   "link_to": "AK Automation",
+   "type": "DocType"
+  },
+  {
+   "color": "Grey",
+   "doc_view": "List",
+   "icon": "list-alt",
+   "label": "AK Automation Log",
+   "link_to": "AK Automation Log",
+   "type": "DocType"
+  },
+  {
+   "color": "Green",
+   "doc_view": "",
+   "icon": "setting-gear",
+   "label": "Settings",
+   "link_to": "AK Automation Settings",
+   "type": "DocType"
+  }
+ ],
+ "title": "Automation AK"
+}
