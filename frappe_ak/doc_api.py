@@ -124,17 +124,17 @@ def submit_response(secret_key, response_type, field_values):
     if template.attach_pdf_on_submission and share.reference_name and not template.is_public_form:
         try:
             from frappe_ak.renderer import render_response_as_pdf
+            from frappe.utils.file_manager import save_file
+
             pdf_bytes = render_response_as_pdf(response)
             file_name = f"{share.reference_name}-{response_type}-{response.name}.pdf"
-            _file = frappe.get_doc({
-                "doctype": "File",
-                "file_name": file_name,
-                "attached_to_doctype": share.reference_doctype,
-                "attached_to_name": share.reference_name,
-                "is_private": 1,
-                "content": pdf_bytes,
-            })
-            _file.save(ignore_permissions=True)
+            _file = save_file(
+                fname=file_name,
+                content=pdf_bytes,
+                dt=share.reference_doctype,
+                dn=share.reference_name,
+                is_private=True,
+            )
 
             # Save file URL on response and share for easy access
             frappe.db.set_value("AK Document Response", response.name, "attached_pdf", _file.file_url)
