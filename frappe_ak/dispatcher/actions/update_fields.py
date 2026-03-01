@@ -33,14 +33,23 @@ def execute(action_row, doc, automation):
 			)
 		# Also update the in-memory doc so subsequent actions see the change
 		for fieldname, value in changed_fields.items():
-			doc.set(fieldname, value)
+			_set_field(doc, fieldname, value)
 	else:
 		# For before_save, just set on the doc object — it will be saved automatically
 		for fieldname, value in changed_fields.items():
-			doc.set(fieldname, value)
+			_set_field(doc, fieldname, value)
 
 	field_names = ", ".join(changed_fields.keys())
 	return f"Updated fields: {field_names}"
+
+
+def _set_field(doc, fieldname, value):
+	"""Set a field on the doc, handling both Document and plain dict objects."""
+	set_fn = getattr(doc, "set", None)
+	if callable(set_fn):
+		doc.set(fieldname, value)
+	else:
+		doc[fieldname] = value
 
 
 def _get_updates(action_row, automation):

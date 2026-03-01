@@ -90,7 +90,7 @@ class TestSendReminders(UnitTestCase):
 
 	@patch("frappe_ak.tasks.frappe.db.commit")
 	@patch("frappe_ak.tasks.frappe.db.set_value")
-	@patch("frappe_ak.tasks.send_document_email", side_effect=Exception("SMTP error"))
+	@patch("frappe_ak.email_utils.send_document_email", side_effect=Exception("SMTP error"))
 	@patch("frappe_ak.tasks.frappe.log_error")
 	@patch("frappe_ak.tasks.frappe.get_all")
 	def test_handles_send_failure_gracefully(self, mock_get_all, mock_log_error, mock_send_email, mock_set_value, mock_commit):

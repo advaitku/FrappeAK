@@ -477,7 +477,9 @@ class TestCleanupOldLogs(UnitTestCase):
 			"status": "Success",
 			"executed_at": old_date,
 			"execution_time_ms": 1.0,
-		}).insert(ignore_permissions=True)
+		})
+		log.flags.ignore_links = True
+		log.insert(ignore_permissions=True)
 		frappe.db.commit()
 
 		with patch("frappe.get_single") as mock_settings:
@@ -499,7 +501,9 @@ class TestCleanupOldLogs(UnitTestCase):
 			"status": "Success",
 			"executed_at": frappe.utils.now_datetime(),
 			"execution_time_ms": 1.0,
-		}).insert(ignore_permissions=True)
+		})
+		log.flags.ignore_links = True
+		log.insert(ignore_permissions=True)
 		frappe.db.commit()
 
 		with patch("frappe.get_single") as mock_settings:
@@ -615,20 +619,18 @@ class TestCronAutomations(UnitTestCase):
 
 	def test_run_cron_automations_skips_non_matching(self):
 		"""Cron that doesn't match current time should not execute."""
+		mock_auto = frappe._dict({
+			"name": "AUTO-CRON",
+			"cron_expression": "0 0 1 1 *",  # Jan 1 midnight — won't match unless run at that exact time
+		})
+
 		with (
 			patch("frappe.get_all", return_value=["AUTO-CRON"]),
-			patch("frappe.get_doc") as mock_getdoc,
+			patch("frappe.get_doc", return_value=mock_auto),
 			patch("frappe_ak.dispatcher.engine._run_cron_automation") as mock_run,
+			patch("frappe.log_error"),
 		):
-			# Set up a cron expression that won't match (Feb 30 doesn't exist)
-			mock_auto = frappe._dict({
-				"name": "AUTO-CRON",
-				"cron_expression": "0 0 30 2 *",
-			})
-			mock_getdoc.return_value = mock_auto
-
 			from frappe_ak.dispatcher.engine import run_cron_automations
-			# The croniter will compute prev fire time far in the past
 			run_cron_automations()
 			mock_run.assert_not_called()
 

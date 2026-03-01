@@ -162,9 +162,9 @@ def run_cron_automations():
 		automation = frappe.get_doc("AK Automation", auto_name)
 		try:
 			cron = croniter(automation.cron_expression, now)
-			prev = cron.get_prev()
+			prev = cron.get_prev(float)
 			# If the previous fire time is within the last 60 seconds, run it
-			if (now.timestamp() - prev.timestamp()) < 60:
+			if (now.timestamp() - prev) < 60:
 				# Cron automations run against all matching documents
 				_run_cron_automation(automation)
 		except Exception:
@@ -221,7 +221,7 @@ def _log_execution(automation, doc, trigger_type, status, actions_executed=None,
 
 	import json
 
-	frappe.get_doc({
+	log_doc = frappe.get_doc({
 		"doctype": "AK Automation Log",
 		"automation": automation.name,
 		"reference_doctype": doc.doctype,
@@ -231,4 +231,6 @@ def _log_execution(automation, doc, trigger_type, status, actions_executed=None,
 		"actions_executed": json.dumps(actions_executed) if actions_executed else None,
 		"error_traceback": error,
 		"execution_time_ms": elapsed_ms,
-	}).insert(ignore_permissions=True)
+	})
+	log_doc.flags.ignore_links = True
+	log_doc.insert(ignore_permissions=True)

@@ -344,7 +344,7 @@ class TestCreateTodoAction(UnitTestCase):
 			"action_type": "Create Todo",
 			"record_values_json": None,
 		})
-		doc = frappe._dict({"doctype": "Event", "name": "EVT-1"})
+		doc = frappe._dict({"doctype": "User", "name": "Administrator"})
 		auto = frappe._dict({"name": "AUTO-TD"})
 
 		from frappe_ak.dispatcher.actions.create_todo import execute
@@ -353,9 +353,9 @@ class TestCreateTodoAction(UnitTestCase):
 		self.assertIn("Created ToDo", result)
 		todo_name = result.split(": ")[1]
 		todo = frappe.get_doc("ToDo", todo_name)
-		self.assertIn("EVT-1", todo.description)
-		self.assertEqual(todo.reference_type, "Event")
-		self.assertEqual(todo.reference_name, "EVT-1")
+		self.assertIn("Administrator", todo.description)
+		self.assertEqual(todo.reference_type, "User")
+		self.assertEqual(todo.reference_name, "Administrator")
 		frappe.delete_doc("ToDo", todo_name, ignore_permissions=True, force=True)
 
 	def test_custom_config(self):
@@ -369,7 +369,7 @@ class TestCreateTodoAction(UnitTestCase):
 			"action_type": "Create Todo",
 			"record_values_json": json.dumps(config),
 		})
-		doc = frappe._dict({"doctype": "Event", "name": "EVT-2"})
+		doc = frappe._dict({"doctype": "User", "name": "Administrator"})
 		auto = frappe._dict({"name": "AUTO-TD"})
 
 		from frappe_ak.dispatcher.actions.create_todo import execute
@@ -388,7 +388,7 @@ class TestCreateTodoAction(UnitTestCase):
 			"action_type": "Create Todo",
 			"record_values_json": json.dumps(config),
 		})
-		doc = frappe._dict({"doctype": "Event", "name": "EVT-JINJA"})
+		doc = frappe._dict({"doctype": "User", "name": "Administrator"})
 		auto = frappe._dict({"name": "AUTO-TD"})
 
 		from frappe_ak.dispatcher.actions.create_todo import execute
@@ -396,7 +396,7 @@ class TestCreateTodoAction(UnitTestCase):
 
 		todo_name = result.split(": ")[1]
 		todo = frappe.get_doc("ToDo", todo_name)
-		self.assertIn("EVT-JINJA", todo.description)
+		self.assertIn("Administrator", todo.description)
 		frappe.delete_doc("ToDo", todo_name, ignore_permissions=True, force=True)
 
 

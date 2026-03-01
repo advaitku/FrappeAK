@@ -38,6 +38,7 @@ def execute(action_row, doc, automation):
 		"priority": priority,
 		"date": date,
 	})
+	todo.flags.ignore_links = True
 	todo.insert(ignore_permissions=True)
 
 	return f"Created ToDo: {todo.name}"

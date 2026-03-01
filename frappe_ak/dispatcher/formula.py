@@ -57,7 +57,7 @@ def evaluate_expression(expr, doc):
 	- if status == 'Open' then 'Active' else 'Inactive' end
 	- concat(firstname, ' ', lastname)
 	"""
-	if not expr:
+	if not expr or not expr.strip():
 		return None
 
 	expr = expr.strip()
@@ -148,7 +148,8 @@ def _build_context(doc):
 	"""Build the evaluation context dict from a document."""
 	context = {}
 	# Add all doc fields as top-level variables
-	doc_dict = doc.as_dict() if hasattr(doc, "as_dict") else dict(doc)
+	as_dict_fn = getattr(doc, "as_dict", None)
+	doc_dict = as_dict_fn() if callable(as_dict_fn) else dict(doc)
 	for key in doc_dict:
 		context[key] = doc.get(key)
 	# Also available as doc.fieldname
