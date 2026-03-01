@@ -141,8 +141,8 @@ def submit_response(secret_key, response_type, field_values):
             frappe.db.set_value("AK Document Share", share.name, "attached_pdf", _file.file_url)
         except Exception:
             frappe.log_error(
-                f"PDF attachment failed for response {response.name}",
-                "Doc Designer AK PDF Error",
+                title="Doc Designer AK PDF Error",
+                message=f"PDF attachment failed for response {response.name}",
             )
 
     # Audit trail: add comment on the original document
@@ -556,8 +556,8 @@ def _notify_sender(share_doc, subject, message):
         )
     except Exception:
         frappe.log_error(
-            f"Notification failed for share {share_doc.name}",
-            "Doc Designer AK Notification Error",
+            title="Doc Designer AK Notification Error",
+            message=f"Notification failed for share {share_doc.name}",
         )
 
 
@@ -612,6 +612,6 @@ def check_auto_send(doc, method):
             send_document_email(result["name"])
         except Exception:
             frappe.log_error(
-                f"Auto-send failed for {doc.doctype} {doc.name} with template {tmpl.name}",
-                "Doc Designer AK Auto-Send Error",
+                title="Doc Designer AK Auto-Send Error",
+                message=f"Auto-send failed for {doc.doctype} {doc.name} with template {tmpl.name}",
             )

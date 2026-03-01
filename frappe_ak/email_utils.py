@@ -85,5 +85,5 @@ def _render_jinja(template_str, context):
         tmpl = env.from_string(template_str)
         return tmpl.render(**context)
     except Exception as e:
-        frappe.log_error(f"Email template render error: {e}", "Doc Designer AK")
+        frappe.log_error(title="Doc Designer AK", message=f"Email template render error: {e}")
         return ""

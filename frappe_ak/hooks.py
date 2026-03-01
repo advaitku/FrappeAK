@@ -5,6 +5,7 @@ app_description = "AKCOM Ledger and Document Designer for Frappe"
 app_email = "advait.k@swajal.in"
 app_license = "MIT"
 app_logo = "/assets/frappe_ak/images/ak_logo.svg"
+required_apps = ["frappe"]
 
 # App includes (loaded on every Desk page)
 app_include_js = [
@@ -37,9 +38,18 @@ email_templates = [
 # Document Events
 doc_events = {
     "*": {
-        "after_insert": "frappe_ak.doc_api.check_auto_send",
-        "on_update": "frappe_ak.doc_api.check_auto_send",
-        "on_submit": "frappe_ak.doc_api.check_auto_send",
+        "after_insert": [
+            "frappe_ak.doc_api.check_auto_send",
+            "frappe_ak.dispatcher.engine.handle_event",
+        ],
+        "on_update": [
+            "frappe_ak.doc_api.check_auto_send",
+            "frappe_ak.dispatcher.engine.handle_event",
+        ],
+        "on_submit": [
+            "frappe_ak.doc_api.check_auto_send",
+            "frappe_ak.dispatcher.engine.handle_event",
+        ],
     }
 }
 
@@ -64,8 +74,14 @@ fixtures = [
 
 # Scheduled Tasks
 scheduler_events = {
+    "all": [
+        "frappe_ak.dispatcher.engine.run_cron_automations",
+    ],
     "hourly": [
         "frappe_ak.tasks.expire_shares",
         "frappe_ak.tasks.send_reminders",
+    ],
+    "daily": [
+        "frappe_ak.dispatcher.engine.cleanup_old_logs",
     ],
 }

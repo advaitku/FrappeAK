@@ -394,5 +394,5 @@ def _render_jinja(template_str, context):
         tmpl = env.from_string(template_str)
         return tmpl.render(**context)
     except Exception as e:
-        frappe.log_error(f"Template rendering error: {e}", "Doc Designer AK")
+        frappe.log_error(title="Doc Designer AK", message=f"Template rendering error: {e}")
         return f'<div class="ak-error">Template rendering error: {frappe.utils.escape_html(str(e))}</div>'

@@ -80,8 +80,8 @@ def send_reminders():
                 reminder_count += 1
             except Exception:
                 frappe.log_error(
-                    f"Reminder send failed for share {share.name}",
-                    "Doc Designer AK Reminder Error",
+                    title="Doc Designer AK Reminder Error",
+                    message=f"Reminder send failed for share {share.name}",
                 )
 
     if reminder_count:
